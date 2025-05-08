@@ -2,8 +2,69 @@ from roblib import *
 import numpy as np
 
 dt = 0.1
-s = 6
+s = 10
 ax = init_figure(-s, s, -s, s)
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def rot2H(theta):
+    """Retourne une matrice homogène de rotation 2D"""
+    return np.array([
+        [np.cos(theta), -np.sin(theta), 0],
+        [np.sin(theta),  np.cos(theta), 0],
+        [0, 0, 1]
+    ])
+
+def tran2H(x, y):
+    """Retourne une matrice homogène de translation 2D"""
+    return np.array([
+        [1, 0, x],
+        [0, 1, y],
+        [0, 0, 1]
+    ])
+
+def plot2D(points, color='black', lw=1):
+    """Affiche un polygone à partir d'un tableau homogène 3xN"""
+    plt.plot(points[0], points[1], color=color, linewidth=lw)
+
+def draw_sailboat2(x, δs, δr, ψ=None, awind=None):
+    mx, my, θ, v, w = x.flatten()
+    
+    # Définir les formes (en coordonnées locales)
+    hull = np.array([
+        [-0.3,  1.8,  2.1, 2.1, 1.8, -0.3, -0.3, -0.3],
+        [-0.6, -0.6, -0.3, 0.3, 0.6,  0.6, -0.6, -0.6],
+        [1,    1,    1,    1,   1,    1,    1,    1   ]
+    ])
+    
+    sail = np.array([
+        [0, 0, 0.3],
+        [0, 1.5, 1.5],
+        [1, 1, 1]
+    ])
+    
+    rudder = np.array([
+        [-0.2, 0.2],
+        [0,    0],
+        [1,    1]
+    ])
+
+    # Transformation globale du bateau
+    R_bateau = tran2H(mx, my) @ rot2H(θ)
+
+    # Transformation voile (à l'avant du bateau, tournée selon δs)
+    R_voile = R_bateau @ tran2H(1.5, 0) @ rot2H(δs)
+
+    # Transformation gouvernail (à l'arrière du bateau, tournée selon δr)
+    R_gouvernail = R_bateau @ tran2H(-0.5, 0) @ rot2H(δr)
+
+    # Affichage
+    plot2D(R_bateau @ hull, 'black')
+    plot2D(R_voile @ sail, 'red', 2)
+    plot2D(R_gouvernail @ rudder, 'blue', 2)
+
+    plt.axis('equal')
 
 # Point de départ et d'arrivée
 starting_point = np.array([0, 0])
@@ -12,10 +73,10 @@ r = 2   # tolérance pour le virement
 
 # Vent apparent
 ψ = 2     # direction du vent
-awind = 10  # vitesse du vent
+awind = 40  # vitesse du vent
 
 #coefficient du boat
-p1 = 0 #derive
+p1 = 0.001 #derive
 p2 = 0.5 #friction
 p3 = 0.5 #angular friction
 p4 = 0.5 #sail lift
@@ -49,7 +110,9 @@ def dynamics(x, δs, δr, ψ, awind):
     gs = -p4*awind*np.sin(δs-ψ)
     gr = -p5*v**2*np.sin(δr)
     vdot = (gs*sin(δs)-gr*sin(δr)*p11-p2*v**2)/p9
-    wdot = gs*(p6-p7*cos(δs))-gr*p8*cos(δr)-p3*w*v/p10
+    wdot = - gr * p8 * cos(δr) - p3 * w * v / p10
+    #wdot += gs * (p6 - p7 * cos(δs)) 
+
     return np.array([[x1dot], [x2dot], [θdot], [vdot], [wdot]])
 
 draw_field(ax, wind_effect, -s, s, -s, s, 0.4)
@@ -87,13 +150,13 @@ for t in arange(0, 20, dt):
     δs_max = np.pi / 2 * (np.cos(ψ - θ_bar) + 1) / 2
     δs = δs_max
     
-    # # Dessin du bateau et champ
+    # # # Dessin du bateau et champ
     draw_field(ax, wind_effect, -s, s, -s, s, 0.4)
-    draw_sailboat(x, δs, δr, ψ, awind)
+    draw_sailboat2(x, δs, δr, ψ, awind)
     
     # Mise à jour du modèle dynamique du bateau
-    # δr = 0
-    # δs = -np.sign(ψ)*min(abs(δs), abs(np.pi-abs(ψ)))
+    #δr = 0
+    #δs = -np.sign(ψ)*min(abs(δs), abs(np.pi-abs(ψ)))
     x = x + dt * dynamics(x, δs, δr, ψ, awind)  # Assumes you have a function `dynamics`
     
     pause(0.05)

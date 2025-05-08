@@ -490,12 +490,12 @@ def draw_sailboat(x,δs,δr,ψ,awind):
     sail=array([[-2.1,0],[0,0],[0.3,0.3]])
     rudder=array([[-0.3,0.3],[0,0],[0.3,0.3]])
     R=tran2H(mx,my)@rot2H(θ)
-    Rs=tran2H(3,0)@rot2H(δs)
-    Rr=tran2H(-1,0)@rot2H(δr)
-    draw_arrow(mx+5,my,ψ,5*awind,'red')
-    plot2D(R@hull,'black');
-    plot2D(R@Rs@sail,'red',2);
-    plot2D(R@Rr@rudder,'red',2);
+    Rs = R @ tran2H(3, 0) @ rot2H(δs)
+    Rr = R @ tran2H(-1, 0) @ rot2H(δr)
+    plot2D(Rs @ sail, 'red', 2)
+    plot2D(Rr @ rudder, 'red', 2)
+    #draw_arrow(mx+5,my,ψ,5*awind,'red')
+    plot2D(R@hull,'black')
 
 def draw_tank(x,col='darkblue',r=1,w=2):
     mx,my,θ=tolist(x)[0:3]
@@ -646,7 +646,14 @@ def draw_field(ax,f,xmin,xmax,ymin,ymax,a):
     X1,X2 = meshgrid(Mx,My)
     VX,VY=f(X1,X2) 
     R=sqrt(VX**2+VY**2)
-    quiver(Mx,My,VX/R,VY/R)  
+    quiver(
+        X1, X2,
+        VX / R, VY / R,
+        scale=2,         # Plus petit = flèches plus grandes
+        scale_units='xy',
+        width=0.001,
+        color='black'
+    )
     
     
 
