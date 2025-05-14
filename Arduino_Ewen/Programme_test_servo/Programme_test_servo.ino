@@ -9,7 +9,6 @@
  *  pulselength = map(degrees, 0, 180, SERVOMIN, SERVOMAX);
  */
 
-#include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
 // called this way, it uses the default address 0x40
