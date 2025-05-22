@@ -17,11 +17,11 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMIN  150 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  600 // this is the 'maximum' pulse length count (out of 4096)
 
-uint8_t servonum = 0;
+uint8_t servonum = 1;
+int command = 400;
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("16 channel Servo test!");
 
   pwm.begin();
 
@@ -31,17 +31,12 @@ void setup() {
 
 void loop() {
   // Drive each servo one at a time
-  Serial.println(servonum);
-  Serial.println("Going from 0 to 180...");
-  for (int pos = 0; pos <= 180; pos++) {
-    pwm.setPWM(servonum, 0, map(pos, 0, 180, SERVOMIN, SERVOMAX));
-    delay(10);
+  if(Serial.available()>0){
+    command = Serial.parseInt();
+    Serial.print("Received command : ");
+    Serial.println(command);
   }
+  pwm.setPWM(servonum, 0, command);
   delay(500);
-  Serial.println("Going from 180 to 0...");
-  for (int pos = 180; pos >= 0; pos--) {
-    pwm.setPWM(servonum, 0, map(pos, 0, 180, SERVOMIN, SERVOMAX));
-    delay(10);
-  }
-  delay(500);
+  
 }
