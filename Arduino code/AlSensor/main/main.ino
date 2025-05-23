@@ -5,10 +5,12 @@
 #include "controlMotor.h"
 #include "ewensboatlib.h"
 
+GPS gps_boat;  
+
 void setup() {
   Serial.begin(9600);
   imu_init();
-  GPS_init();
+  gps_boat.init();
   motor_init();
   wind_sensor_init();
 }
