@@ -42,6 +42,12 @@ void get_wind_data() {
 
 float get_wind_direction(){
   heading_bytes = analogRead(A15);
-  heading = (float)heading_bytes / 1023 * 360;
+  heading = 2 * atan(tan(((float)heading_bytes / 1023 * 2 * M_PI + M_PI)/2)) * 180/M_PI;
+        if(heading>=0){
+            heading  = 180 - heading;
+        }
+        else{
+            heading = -180 - heading;
+        }
   return heading;
 }

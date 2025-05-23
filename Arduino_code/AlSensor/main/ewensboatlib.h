@@ -7,5 +7,6 @@
 #include "IMU.h"
 
 void follow_cap(float cap_a_suivre);
+void set_sail_pos();
 
 #endif

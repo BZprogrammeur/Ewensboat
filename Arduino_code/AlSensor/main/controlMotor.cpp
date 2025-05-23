@@ -15,6 +15,8 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define GAMMA M_PI/4  ///< Incidence angle
 #define ZETA M_PI/4
 
+int previous_sail_command = 450;
+
 float sawtooth(float x)
 {
     return 2*atan(tan(x/2));
@@ -26,7 +28,7 @@ void motor_init() {
   Serial.println("Initialisation PCA9685...");
 
   pwm.begin();
-  pwm.setPWMFreq(50);  // 50 Hz pour servos
+  pwm.setPWMFreq(60);  // 50 Hz pour servos
 
   delay(10);
 }
@@ -93,9 +95,19 @@ int sail_control(int wind_direction) {
 
 void set_angle_sail(int angle)
 {
-  float pulse = 0;
-  pulse = ((SERVOMAX_SAIL-SERVOMIN_SAIL)/90)*angle + SERVOMIN_SAIL;
-  pwm.setPWM(0, 0, pulse);
+  int actual_command = (int)map(angle, 0, 90, SERVOMIN_SAIL, SERVOMAX_SAIL);
+  //Serial.print("Commande voile :");
+  //Serial.println(actual_command);
+  int increment = (actual_command > previous_sail_command) ? 1 : -1;
+  for (int command = previous_sail_command; command != actual_command; command += increment) {
+    pwm.setPWM(0, 0, command);
+    Serial.print("Sending sail command: ");
+    Serial.println(command);
+    delay(10);
+  }
+  //Serial.print("Commande envoyée à la barre:");
+  //Serial.println(pulse);
+  previous_sail_command = actual_command;
 }
 
 float rudder_control(coord a, coord b, coord pos) {
@@ -133,7 +145,5 @@ void set_angle_rudder(int angle)
 {
   float pulse = 0;
   pulse = map(angle, -50, 50, SERVOMIN_RUDDER, SERVOMAX_RUDDER);
-  Serial.print("Commande envoyée:");
-  Serial.println(pulse);
   pwm.setPWM(1, 0, pulse);
 }
