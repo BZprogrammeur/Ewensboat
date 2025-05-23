@@ -16,5 +16,6 @@ void setup() {
 void loop() {
   float cap_cible = 90.0;  // cap cible en degrés
   follow_cap(cap_cible);
-  delay(100);  // 100 ms = DELTA_T
+  set_sail_pos();
+  delay(500);  // 100 ms = DELTA_T
 }

@@ -1,9 +1,10 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "ewensboatlib.h"
+#include "windSensor.h"
 
-#define SERVOMIN_RUDDER  150 // Minimum pulse length
-#define SERVOMAX_RUDDER  580 //somme des deux doit faire 580
+#define SERVOMIN_RUDDER  230 
+#define SERVOMAX_RUDDER  490 
 
 // Constantes PD en DEGRÉS
 const float Kp = 2.0;     // Gain proportionnel (à ajuster)
@@ -19,9 +20,17 @@ void follow_cap(float cap_a_suivre) {
   // Saturation à l’amplitude max du gouvernail
   if (erreur > 50) erreur = 50;
   if (erreur < -50) erreur = -50;
-  Serial.print("Erreur calculée:  ");
-  Serial.println(erreur);
+  //Serial.print("Erreur calculée:  ");
+  //Serial.println(erreur);
   set_angle_rudder(erreur);
 
   erreur_precedente = erreur;
+}
+
+void set_sail_pos(){
+  float wind_angle = get_wind_direction();
+  float sail_angle = map(abs(wind_angle), 0, 180, 0, 90);
+  //Serial.print("Angle calculé de la voile:");
+  //Serial.println(sail_angle);
+  set_angle_sail(sail_angle);  
 }
