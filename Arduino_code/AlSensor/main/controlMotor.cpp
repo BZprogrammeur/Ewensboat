@@ -7,8 +7,8 @@
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
-#define SERVOMIN_SAIL  200 // Minimum pulse length
-#define SERVOMAX_SAIL  370 // Maximum pulse length
+#define SERVOMIN_SAIL  450 // Minimum pulse length
+#define SERVOMAX_SAIL  600 // Maximum pulse length
 #define SERVOMIN_RUDDER  230 // Minimum pulse length
 #define SERVOMAX_RUDDER  490 //doit être centré sur 340
 #define R 12
