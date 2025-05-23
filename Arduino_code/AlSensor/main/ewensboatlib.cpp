@@ -16,7 +16,6 @@ void follow_cap(float cap_a_suivre) {
   float cap_actuel = get_cap(); // Renvoie un cap entre 0 et 360
   // Calcul de l’erreur dans [-180, +180] degrés
   float erreur =cap_actuel -  cap_a_suivre;
-
   // Saturation à l’amplitude max du gouvernail
   if (erreur > 50) erreur = 50;
   if (erreur < -50) erreur = -50;
