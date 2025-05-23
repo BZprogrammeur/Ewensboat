@@ -4,9 +4,19 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-void wind_sensor_init();
-void get_wind_data();
-void countPulse();
-float get_wind_direction();
-
+class WindSensor {
+public:
+    WindSensor();
+    void init();
+    void update();
+    float get_wind_speed() const;
+    float get_wind_direction() const;
+    void countPulse();
+private:   
+    float windSpeed;
+    float heading;
+    int heading_bytes;
+    volatile int pulseCount;
+    volatile unsigned long lastTime;
+};
 #endif 

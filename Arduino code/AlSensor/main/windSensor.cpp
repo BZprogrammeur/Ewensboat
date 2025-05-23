@@ -2,40 +2,47 @@
 #include <Wire.h>
 #include "windSensor.h"
 
-int heading_bytes;
-float heading;
-volatile int pulseCount = 0;
-unsigned long lastTime = 0;
-
-void countPulse() {
+WindSensor::WindSensor() {
+    pulseCount = 0;
+    lastTime = 0;
+    heading_bytes = 0;
+    heading = 0.0;
+    windSpeed = 0.0;  
+}
+void WindSensor::countPulse() {
     pulseCount++;  // Incrémente à chaque impulsion
 }
 
-void wind_sensor_init() {
-    Serial.begin(9600);
-    pinMode(19, INPUT_PULLUP);  // Utilisation de la pin 18 avec pull-up
-    attachInterrupt(digitalPinToInterrupt(19), countPulse, RISING);  // Déclenche sur front montant
+WindSensor* windSensorInstance = nullptr; // Pointeur vers l'objet
+
+void countPulse_ISR() {
+    if (windSensorInstance) {
+        windSensorInstance->countPulse();
+    }
 }
 
-void get_wind_data() {
+void WindSensor::init() {
+    windSensorInstance = this;  // lie l'objet courant à l'ISR
+    pinMode(19, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(19), countPulse_ISR, RISING);
+    Serial.println("Initialisation du capteur de vent...");
+}
+
+void WindSensor::update() {
     unsigned long currentTime = millis();
     if (currentTime - lastTime >= 2250) {  // Calcul toutes les secondes
-        float windSpeed = pulseCount * 0.44704;  // Facteur de conversion (à ajuster selon le capteur)
-        Serial.print("Vitesse du vent: ");
-        Serial.print(windSpeed);
-        Serial.println(" m/s");
+        float windSpeed = pulseCount * 0.44704;  // Facteur de conversion (à ajuster selon le capteur);
         heading_bytes = analogRead(A15);
         heading = (float)heading_bytes / 1023 * 360;
-        Serial.print("Direction du vent:");
-        Serial.print(heading);
-        Serial.println("°");
         pulseCount = 0;  // Réinitialisation du compteur
         lastTime = currentTime;
     }
 }
 
-float get_wind_direction(){
-  heading_bytes = analogRead(A15);
-  heading = (float)heading_bytes / 1023 * 360;
+float WindSensor::get_wind_direction() const{
   return heading;
+}
+
+float WindSensor::get_wind_speed() const{
+  return windSpeed;
 }

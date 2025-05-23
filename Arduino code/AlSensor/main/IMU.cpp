@@ -15,14 +15,15 @@ IMU::IMU()
     angle16 = 0;
     cap = 0.0;
 }
-void imu_init()
+
+void IMU::init()
 {
     Serial.begin(9600); 
     Wire.begin();
     Serial.println("Initialisation IMU...");
 }
 
-void update()
+void IMU::update()
 {
     Wire.beginTransmission(CMPS12_ADDRESS);  //starts communication with CMPS12
     Wire.write(ANGLE_8);                     //Sends the register we wish to start reading from
@@ -54,6 +55,6 @@ void update()
     cap = angle16 / 10;               
 }
 
-float get_cap(){
+float IMU::get_cap(){
   return cap;
 }

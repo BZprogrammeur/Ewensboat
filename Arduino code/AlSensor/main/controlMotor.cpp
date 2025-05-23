@@ -5,23 +5,17 @@
 #include "IMU.h"
 #include "windSensor.h"
 
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+controlMotor::controlMotor() : pwm(Adafruit_PWMServoDriver()) {
+  angle_rudder = 0;
+  angle_sail = 0;
+}
 
-#define SERVOMIN_SAIL  200 // Minimum pulse length
-#define SERVOMAX_SAIL  370 // Maximum pulse length
-#define SERVOMIN_RUDDER  250 // Minimum pulse length
-#define SERVOMAX_RUDDER  430 //somme des deux doit faire 580
-#define R 12
-#define GAMMA M_PI/4  ///< Incidence angle
-#define ZETA M_PI/4
-
-float sawtooth(float x)
+float controlMotor::sawtooth(float x)
 {
     return 2*atan(tan(x/2));
 }
 
-
-void motor_init() {
+void controlMotor::init() {
   Serial.begin(9600);
   Serial.println("Initialisation PCA9685...");
 
@@ -31,7 +25,7 @@ void motor_init() {
   delay(10);
 }
 
-void test_motor_sail() {
+void controlMotor::test_motor_sail() {
   // Balayage d’un servo connecté sur le canal 0
   for (int pulselen = SERVOMIN_SAIL; pulselen <= SERVOMAX_SAIL; pulselen++) {
     pwm.setPWM(0, 0, pulselen);
@@ -44,7 +38,7 @@ void test_motor_sail() {
   }
 }
 
-void test_motor_rudder(){
+void controlMotor::test_motor_rudder(){
   // Balayage d’un servo connecté sur le canal 0
   for (int pulselen = SERVOMIN_RUDDER; pulselen <= SERVOMAX_RUDDER; pulselen++) {
     pwm.setPWM(1, 0, pulselen);
@@ -57,7 +51,7 @@ void test_motor_rudder(){
   }
 }
 
-int sail_control(int wind_direction) {
+int controlMotor::sail_control(int wind_direction) {
     int sail_angle = 0;
 
     if ((wind_direction >= 345 && wind_direction <= 360) || (wind_direction >= 0 && wind_direction <= 15)) {
@@ -91,45 +85,14 @@ int sail_control(int wind_direction) {
     return sail_angle;
 }
 
-void set_angle_sail(int angle)
+void controlMotor::set_angle_sail(int angle)
 {
   float pulse = 0;
   pulse = ((SERVOMAX_SAIL-SERVOMIN_SAIL)/90)*angle + SERVOMIN_SAIL;
   pwm.setPWM(0, 0, pulse);
 }
 
-float rudder_control(coord a, coord b, coord pos) {
-    float a1 = a.x, a2 = a.y;
-    float b1 = b.x, b2 = b.y;
-    float x1 = pos.x, x2 = pos.y;
-
-    float theta = get_cap(); // Cap actuel
-    float wind_direction = get_wind_direction(); 
-
-    float dx = b1 - a1;
-    float dy = b2 - a2;
-    float N = sqrt(dx * dx + dy * dy);
-
-    float e = (dx*(x2 - a2) - dy*(x1 - a1))/N;
-
-    int m_q = 1;
-    if(abs(e) > R/2)
-        m_q = e/abs(e);
-    
-    float angle_target = atan2(dy, dx);
-    float angle_nominal = angle_target - 2*GAMMA*atan(e/R)/M_PI;
-    float angle_actual = angle_nominal;
-
-    if ((cos(wind_direction - angle_nominal) + cos(ZETA) < 0) ||
-        (abs(e) < R && cos(wind_direction - angle_target) + cos(ZETA) < 0)) {
-        angle_actual = M_PI + wind_direction - m_q * ZETA;
-    }
-
-    float angle_rudder = SERVOMAX_RUDDER/M_PI * sawtooth(theta - angle_actual);
-    return angle_rudder;
-}
-
-void set_angle_rudder(int angle)
+void controlMotor::set_angle_rudder(int angle)
 {
   float pulse = 0;
   pulse = ((SERVOMAX_RUDDER-SERVOMIN_RUDDER)/100)*angle + (SERVOMIN_RUDDER+SERVOMAX_RUDDER)/2;
