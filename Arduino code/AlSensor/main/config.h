@@ -8,5 +8,7 @@
 #define R 12
 #define GAMMA M_PI/4  ///< Incidence angle
 #define ZETA M_PI/4
+#define SERVO_SAIL 0
+#define SERVO_RUDDER 1
 
 #endif

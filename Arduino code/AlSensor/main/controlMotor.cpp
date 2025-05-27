@@ -28,12 +28,12 @@ void controlMotor::init() {
 void controlMotor::test_motor_sail() {
   // Balayage d’un servo connecté sur le canal 0
   for (int pulselen = SERVOMIN_SAIL; pulselen <= SERVOMAX_SAIL; pulselen++) {
-    pwm.setPWM(0, 0, pulselen);
+    pwm.setPWM(SERVO_SAIL, 0, pulselen);
     delay(5);
   }
 
   for (int pulselen = SERVOMAX_SAIL; pulselen >= SERVOMIN_SAIL; pulselen--) {
-    pwm.setPWM(0, 0, pulselen);
+    pwm.setPWM(SERVO_SAIL, 0, pulselen);
     delay(5);
   }
 }
@@ -41,12 +41,12 @@ void controlMotor::test_motor_sail() {
 void controlMotor::test_motor_rudder(){
   // Balayage d’un servo connecté sur le canal 0
   for (int pulselen = SERVOMIN_RUDDER; pulselen <= SERVOMAX_RUDDER; pulselen++) {
-    pwm.setPWM(1, 0, pulselen);
+    pwm.setPWM(SERVO_RUDDER, 0, pulselen);
     delay(5);
   }
 
   for (int pulselen = SERVOMAX_SAIL; pulselen >= SERVOMIN_SAIL; pulselen--) {
-    pwm.setPWM(1, 0, pulselen);
+    pwm.setPWM(SERVO_RUDDER, 0, pulselen);
     delay(5);
   }
 }
@@ -88,13 +88,13 @@ int controlMotor::sail_control(int wind_direction) {
 void controlMotor::set_angle_sail(int angle)
 {
   float pulse = 0;
-  pulse = ((SERVOMAX_SAIL-SERVOMIN_SAIL)/90)*angle + SERVOMIN_SAIL;
-  pwm.setPWM(0, 0, pulse);
+  pulse = map(angle, 0, 90, SERVOMIN_SAIL, SERVOMAX_SAIL);
+  pwm.setPWM(SERVO_SAIL, 0, pulse);
 }
 
 void controlMotor::set_angle_rudder(int angle)
 {
   float pulse = 0;
-  pulse = ((SERVOMAX_RUDDER-SERVOMIN_RUDDER)/100)*angle + (SERVOMIN_RUDDER+SERVOMAX_RUDDER)/2;
-  pwm.setPWM(1, 0, pulse);
+  pulse = map(angle, -50, 50, SERVOMIN_RUDDER, SERVOMAX_RUDDER);
+  pwm.setPWM(SERVO_RUDDER, 0, pulse);
 }
