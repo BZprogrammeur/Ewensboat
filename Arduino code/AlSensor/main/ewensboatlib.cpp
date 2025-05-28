@@ -2,30 +2,36 @@
 #include <Wire.h>
 #include "ewensboatlib.h"
 
-Navigation::Navigation():gps(Serial2){}
+Navigation::Navigation():gps(Serial2){
+  sens = false;
+  isTacking = false;
+  }
 
 void Navigation::follow_cap(float cap_a_suivre) {
   imu.update();
-  float cap_actuel = imu.get_cap(); // Renvoie un cap entre 0 et 360
-
-  // Calcul de l’erreur dans [-180, +180] degrés
-  float erreur = cap_a_suivre - cap_actuel;
-  if (erreur > 180) erreur -= 360;
-  if (erreur < -180) erreur += 360;
-
-  // Dérivée
-  float derivee = (erreur - erreur_precedente) / DELTA_T;
-
-  // Commande PD (inversée : angle positif = virage à gauche)
-  float commande = -Kp * erreur - Kd * derivee;
-
-  // Saturation à l’amplitude max du gouvernail
-  if (commande > SERVOMAX_RUDDER) commande = SERVOMAX_RUDDER;
-  if (commande < -SERVOMAX_RUDDER) commande = -SERVOMAX_RUDDER;
-
-  powerboard.set_angle_rudder((int)commande);
-
-  erreur_precedente = erreur;
+  CheckTacking(cap_a_suivre);
+  if (isTacking){tacking(cap_a_suivre);} else {
+    float cap_actuel = imu.get_cap(); // Renvoie un cap entre 0 et 360
+  
+    // Calcul de l’erreur dans [-180, +180] degrés
+    float erreur = cap_a_suivre - cap_actuel;
+    if (erreur > 180) erreur -= 360;
+    if (erreur < -180) erreur += 360;
+  
+    // Dérivée
+    float derivee = (erreur - erreur_precedente) / DELTA_T;
+  
+    // Commande PD (inversée : angle positif = virage à gauche)
+    float commande = -Kp * erreur - Kd * derivee;
+  
+    // Saturation à l’amplitude max du gouvernail
+    if (commande > SERVOMAX_RUDDER) commande = SERVOMAX_RUDDER;
+    if (commande < -SERVOMAX_RUDDER) commande = -SERVOMAX_RUDDER;
+  
+    powerboard.set_angle_rudder((int)commande);
+  
+    erreur_precedente = erreur;
+  }
 }
 
 void Navigation::reach_point(GPScoord point) {
@@ -51,4 +57,31 @@ void Navigation::reach_point(GPScoord point) {
 
   // Fonction qui fait suivre le cap
   follow_cap(cap);
+}
+
+void Navigation::stopSailing(){
+  powerboard.set_angle_sail(SERVOMAX_SAIL);
+  powerboard.set_angle_rudder(0);
+}
+
+void Navigation::tacking(float cap, float difference) {
+  unsigned long t0 = millis();
+  while (millis() - t0 < 10000) {  
+    if (sens) {
+      follow_cap(fmod(cap + difference, 360));
+    } else {
+      follow_cap(fmod(cap - difference + 360, 360));  
+    }
+  }
+  sens = !sens;  
+}
+
+
+void Navigation::CheckTacking(float cap) {
+  float windDirection = wind.get_wind_direction();
+  float angle_diff = fabs(fmod(cap - windDirection + 360, 360));
+  if (angle_diff > 180) {
+    angle_diff = 360 - angle_diff;
+  }
+  isTacking = (angle_diff < 20);
 }
