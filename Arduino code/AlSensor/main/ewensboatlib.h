@@ -6,11 +6,13 @@
 #include "controlMotor.h"
 #include "IMU.h"
 #include "config.h"
+#include "GPS.h"
 
-class nav {
+class Navigation {
 public:
-    nav();
+    Navigation();
     void follow_cap(float cap_a_suivre);
+    void reach_point(GPScoord point);
 private:
     const float Kp = 2.0;     // Gain proportionnel (à ajuster)
     const float Kd = 1.0;     // Gain dérivé (à ajuster)
@@ -18,6 +20,7 @@ private:
     float erreur_precedente = 0;
     IMU imu;
     controlMotor powerboard;
+    GPS gps;
 };
 
 

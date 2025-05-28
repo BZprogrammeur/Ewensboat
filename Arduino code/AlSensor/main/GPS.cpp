@@ -72,3 +72,20 @@ double GPS::getLongitude() const {
 bool GPS::isValid() const {
     return validFix;
 }
+
+
+Cartcoord GPS::conversion(GPScoord point) {
+  Cartcoord result;
+
+  // Conversion des degrés en radians
+  double lat1 = M.lat * M_PI / 180.0;
+  double lat2 = point.lat * M_PI / 180.0;
+  double dLat = lat2 - lat1;
+  double dLng = (point.lng - M.lng) * M_PI / 180.0;
+
+  // Approximation de projection plane (petites distances)
+  result.x = R_EARTH * dLng * cos((lat1 + lat2) / 2.0); // Est
+  result.y = R_EARTH * dLat;                            // Nord
+
+  return result;
+}

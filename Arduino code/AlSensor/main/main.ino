@@ -10,7 +10,7 @@ GPS gps_boat(Serial2);
 IMU imu;
 controlMotor powerboard;
 WindSensor wind;
-nav nav;
+Navigation nav;
 Controler manette;
 
 

@@ -10,5 +10,18 @@
 #define ZETA M_PI/4
 #define SERVO_SAIL 0
 #define SERVO_RUDDER 1
+#define R_EARTH 6371000.0
+
+struct GPScoord{
+  double lat;
+  double lng;
+};
+
+struct Cartcoord{
+  double x;
+  double y;
+};
+
+const GPScoord M = {48.8566, 2.3522};
 
 #endif

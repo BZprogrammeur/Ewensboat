@@ -2,6 +2,7 @@
 #define GPS_H
 
 #include <Arduino.h>
+#include "config.h"
 
 class GPS {
 public:
@@ -13,6 +14,8 @@ public:
     double getLatitude() const;
     double getLongitude() const;
     bool isValid() const;
+
+    Cartcoord conversion(GPScoord point);
 
 private:
     HardwareSerial& gpsSerial;
