@@ -14,7 +14,7 @@ void countPulse() {
 
 void setup() {
     Serial.begin(9600);
-    pinMode(19, INPUT_PULLUP);  // Utilisation de la pin 18 avec pull-up
+    pinMode(18, INPUT_PULLUP);  // Utilisation de la pin 18 avec pull-up
     attachInterrupt(digitalPinToInterrupt(19), countPulse, RISING);  // Déclenche sur front montant
 }
 

@@ -11,12 +11,14 @@ WindSensor::WindSensor() {
 }
 void WindSensor::countPulse() {
     pulseCount++;  // Incrémente à chaque impulsion
+    Serial.println(pulseCount);
 }
 
 WindSensor* windSensorInstance = nullptr; // Pointeur vers l'objet
 
 void countPulse_ISR() {
     if (windSensorInstance) {
+      Serial.println("!!!");
         windSensorInstance->countPulse();
     }
 }
@@ -31,7 +33,7 @@ void WindSensor::init() {
 void WindSensor::update() {
     unsigned long currentTime = millis();
     if (currentTime - lastTime >= 2250) {  // Calcul toutes les secondes
-        float windSpeed = pulseCount * 0.44704;  // Facteur de conversion (à ajuster selon le capteur);
+        windSpeed = pulseCount * 0.44704;  // Facteur de conversion (à ajuster selon le capteur);
         heading_bytes = analogRead(A15);
         heading = (float)heading_bytes / 1023 * 360;
         pulseCount = 0;  // Réinitialisation du compteur

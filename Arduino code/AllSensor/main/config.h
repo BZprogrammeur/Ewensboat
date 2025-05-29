@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define SERVOMIN_RUDDER  170 // Minimum pulse length
+#define SERVOMIN_RUDDER  180 // Minimum pulse length
 #define SERVOMAX_RUDDER  430 //somme des deux doit faire 580
 #define SERVOMIN_SAIL  180 // Minimum pulse length
 #define SERVOMAX_SAIL  280 // Maximum pulse length

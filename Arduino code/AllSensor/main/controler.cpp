@@ -16,7 +16,7 @@ void Controler::controling() {
     aileron = pulseIn(aileronPin, HIGH);
 
     comSail = map(elevation, 1800, 910, SERVOMIN_SAIL, SERVOMAX_SAIL);
-    comRud = map(aileron, 985, 2155, SERVOMIN_RUDDER, SERVOMAX_RUDDER);
+    comRud = map(aileron, 1275, 1860, SERVOMAX_RUDDER, SERVOMIN_RUDDER);
 
     pwm.setPWM(SERVO_SAIL, 0, comSail);
     pwm.setPWM(SERVO_RUDDER, 0, comRud);

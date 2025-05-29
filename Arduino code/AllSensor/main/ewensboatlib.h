@@ -18,6 +18,8 @@ public:
     void stopSailing();
     void tacking(float cap, float difference = 30.0);
     void CheckTacking(float cap);
+    bool getTacking();
+    
 private:
     const float Kp = 2.0;     // Gain proportionnel (à ajuster)
     const float Kd = 1.0;     // Gain dérivé (à ajuster)

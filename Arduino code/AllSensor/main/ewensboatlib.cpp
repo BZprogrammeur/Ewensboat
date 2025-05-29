@@ -26,8 +26,8 @@ void Navigation::follow_cap(float cap_a_suivre) {
     float commande = -Kp * erreur - Kd * derivee;
   
     // Saturation à l’amplitude max du gouvernail
-    if (commande > SERVOMAX_RUDDER) commande = SERVOMAX_RUDDER;
-    if (commande < -SERVOMAX_RUDDER) commande = -SERVOMAX_RUDDER;
+    if (commande > 30) commande = 30;
+    if (commande < -30) commande = -30;
   
     powerboard.set_angle_rudder((int)commande);
   
@@ -80,9 +80,9 @@ void Navigation::tacking(float cap, float difference) {
 
 void Navigation::CheckTacking(float cap) {
   float windDirection = wind.get_wind_direction();
-  float angle_diff = fabs(fmod(cap - windDirection + 360, 360));
-  if (angle_diff > 180) {
-    angle_diff = 360 - angle_diff;
-  }
-  isTacking = (angle_diff < 20);
+  isTacking = (windDirection > 345 || windDirection < 15);
+}
+
+bool Navigation::getTacking(){
+  return isTacking;
 }
