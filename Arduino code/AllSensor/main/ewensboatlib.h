@@ -11,7 +11,8 @@
 
 class Navigation {
 public:
-    Navigation();
+    Navigation(IMU& imu, controlMotor& motor, WindSensor& wind, GPS& gps);
+    
     void follow_cap(float cap_a_suivre);
     void reach_point(GPScoord point);
     void stopSailing();
@@ -24,10 +25,11 @@ private:
     float erreur_precedente = 0;
     bool sens;
     bool isTacking;
-    IMU imu;
-    controlMotor powerboard;
-    WindSensor wind;
-    GPS gps;
+    
+    IMU& imu;
+    controlMotor& powerboard;
+    WindSensor& wind;
+    GPS& gps;
 };
 
 

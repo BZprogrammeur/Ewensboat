@@ -8,7 +8,7 @@ void Controler::init() {
     pinMode(aileronPin, INPUT);
     pinMode(controlPin, INPUT);
     pwm.begin();
-    pwm.setPWMFreq(60); 
+    pwm.setPWMFreq(50); 
 }
 
 void Controler::controling() {

@@ -2,7 +2,8 @@
 #include <Wire.h>
 #include "ewensboatlib.h"
 
-Navigation::Navigation():gps(Serial2){
+Navigation::Navigation(IMU& imu_, controlMotor& motor_, WindSensor& wind_, GPS& gps_)
+    : imu(imu_), powerboard(motor_), wind(wind_), gps(gps_){
   sens = false;
   isTacking = false;
   }

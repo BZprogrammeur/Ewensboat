@@ -10,8 +10,8 @@ GPS gps_boat(Serial2);
 IMU imu;
 controlMotor powerboard;
 WindSensor wind;
-Navigation nav;
 Controler manette;
+Navigation nav(imu, powerboard, wind, gps_boat);
 
 
 void setup() {
