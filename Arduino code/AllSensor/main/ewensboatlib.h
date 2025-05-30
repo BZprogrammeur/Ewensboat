@@ -16,8 +16,8 @@ public:
     void follow_cap(float cap_a_suivre);
     void reach_point(GPScoord point);
     void stopSailing();
-    void tacking(float cap, float difference = 30.0);
-    void CheckTacking(float cap);
+    void count4tacking();
+    void CheckTacking();
     bool getTacking();
     
 private:
@@ -25,8 +25,13 @@ private:
     const float Kd = 1.0;     // Gain dérivé (à ajuster)
     const float DELTA_T = 0.1; // Temps entre deux appels (en secondes)
     float erreur_precedente = 0;
+
+    //variable concernant le tacking
     bool sens;
     bool isTacking;
+    unsigned long tackingStart = 0;
+    bool tackingMode = false;
+    float marge;
     
     IMU& imu;
     controlMotor& powerboard;

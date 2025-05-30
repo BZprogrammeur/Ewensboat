@@ -10,29 +10,39 @@ Navigation::Navigation(IMU& imu_, controlMotor& motor_, WindSensor& wind_, GPS& 
 
 void Navigation::follow_cap(float cap_a_suivre) {
   imu.update();
-  CheckTacking(cap_a_suivre);
-  if (isTacking){tacking(cap_a_suivre);} else {
-    float cap_actuel = imu.get_cap(); // Renvoie un cap entre 0 et 360
-  
-    // Calcul de l’erreur dans [-180, +180] degrés
-    float erreur = cap_a_suivre - cap_actuel;
-    if (erreur > 180) erreur -= 360;
-    if (erreur < -180) erreur += 360;
-  
-    // Dérivée
-    float derivee = (erreur - erreur_precedente) / DELTA_T;
-  
-    // Commande PD (inversée : angle positif = virage à gauche)
-    float commande = -Kp * erreur - Kd * derivee;
-  
-    // Saturation à l’amplitude max du gouvernail
-    if (commande > 30) commande = 30;
-    if (commande < -30) commande = -30;
-  
-    powerboard.set_angle_rudder((int)commande);
-  
-    erreur_precedente = erreur;
+  CheckTacking();
+  float cap_actuel = imu.get_cap(); // Renvoie un cap entre 0 et 360
+  marge = 0.0;
+
+  if (isTacking){
+    count4tacking();
+    if (sens){
+      marge = 30.0;      // gestion du tacking
+    }
+    else {
+      marge = -30.0;
+    }
   }
+  cap_a_suivre += marge;
+  Serial.println(cap_a_suivre);
+  // Calcul de l’erreur dans [-180, +180] degrés
+  float erreur = cap_a_suivre - cap_actuel;
+  if (erreur > 180) erreur -= 360;
+  if (erreur < -180) erreur += 360;
+
+  // Dérivée
+  float derivee = (erreur - erreur_precedente) / DELTA_T;
+
+  // Commande PD (inversée : angle positif = virage à gauche)
+  float commande = -Kp * erreur - Kd * derivee;
+
+  // Saturation à l’amplitude max du gouvernail
+  if (commande > 30) commande = 30;
+  if (commande < -30) commande = -30;
+
+  powerboard.set_angle_rudder((int)commande);
+
+  erreur_precedente = erreur;
 }
 
 void Navigation::reach_point(GPScoord point) {
@@ -65,20 +75,20 @@ void Navigation::stopSailing(){
   powerboard.set_angle_rudder(0);
 }
 
-void Navigation::tacking(float cap, float difference) {
-  unsigned long t0 = millis();
-  while (millis() - t0 < 10000) {  
-    if (sens) {
-      follow_cap(fmod(cap + difference, 360));
-    } else {
-      follow_cap(fmod(cap - difference + 360, 360));  
-    }
+void Navigation::count4tacking() {
+  if (!tackingMode) {
+    tackingStart = millis();
+    tackingMode = true;
   }
-  sens = !sens;  
+
+  if (millis() - tackingStart > 10000) {
+    tackingMode = false;
+    sens = !sens;
+  } 
 }
 
 
-void Navigation::CheckTacking(float cap) {
+void Navigation::CheckTacking() {
   float windDirection = wind.get_wind_direction();
   isTacking = (windDirection > 345 || windDirection < 15);
 }

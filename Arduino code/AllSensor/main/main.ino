@@ -12,8 +12,6 @@ controlMotor powerboard;
 WindSensor wind;
 Controler manette;
 Navigation nav(imu, powerboard, wind, gps_boat);
-bool check;
-float wspeed, wdir;
 
 
 void setup() {
@@ -33,16 +31,6 @@ void loop() {
     
     float cap_cible = 90.0;  // cap cible en degrés
     nav.follow_cap(cap_cible);
-    delay(100);  // 100 ms = DELTA_T
-    check = nav.getTacking();
-    Serial.println(check);
-    wspeed = wind.get_wind_speed();
-    wdir = wind.get_wind_direction();
-    Serial.print("vitesse ");;
-    Serial.println(wspeed);
-    Serial.print("orientation ");
-    Serial.println(wdir);
-    delay(1000);
   }
   else
   {
