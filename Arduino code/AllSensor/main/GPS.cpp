@@ -16,6 +16,9 @@ void GPS::update() {
             if (nmeaBuffer.startsWith("$GPRMC")) {
                 validFix = parseGPRMC(nmeaBuffer);
             }
+            else if (nmeaBuffer.startsWith("$GPGGA")) {
+                parseGPGGA(nmeaBuffer);  // Met à jour les satellites
+            }
             nmeaBuffer = ""; // reset
         } else if (c != '\r') {
             nmeaBuffer += c;
@@ -73,6 +76,41 @@ bool GPS::isValid() const {
     return validFix;
 }
 
+int GPS::getSatelliteCount() const {
+    return satellites;
+}
+
+GPScoord GPS::getPoint() const {
+    float lat = getLatitude();
+    float lon = getLongitude();
+
+    // Tu peux mettre ici un critère simple pour détecter une erreur GPS
+//    if (lat == 0.0f && lon == 0.0f) {
+//        Serial.println("GPS is not finding position");
+//    }
+
+    return GPScoord{lat, lon};
+}
+
+bool GPS::parseGPGGA(const String& nmea) {
+    // Ex: $GPGGA,123519,4807.038,N,01131.000,E,1,08,...
+    if (!nmea.startsWith("$GPGGA")) return false;
+
+    int fieldIndex = 0;
+    int start = 0;
+    int end = 0;
+    while (fieldIndex <= 7 && end != -1) {
+        end = nmea.indexOf(',', start);
+        if (fieldIndex == 7) {
+            String satStr = nmea.substring(start, end);
+            satellites = satStr.toInt();
+            return true;
+        }
+        start = end + 1;
+        fieldIndex++;
+    }
+    return false;
+}
 
 Cartcoord GPS::conversion(GPScoord point) {
   Cartcoord result;

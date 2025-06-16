@@ -18,5 +18,8 @@ private:
     int heading_bytes;
     volatile int pulseCount;
     volatile unsigned long lastTime;
+    bool EMAfilter = true;
+    float alpha = 0.8;
+    float filteredHeading;
 };
 #endif 

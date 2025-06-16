@@ -56,5 +56,5 @@ void IMU::update()
 }
 
 float IMU::get_cap(){
-  return cap;
+  return fmod((cap+180),360);
 }

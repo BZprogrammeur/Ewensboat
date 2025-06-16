@@ -14,7 +14,7 @@ void Navigation::follow_cap(float cap_a_suivre) {
   float cap_actuel = imu.get_cap(); // Renvoie un cap entre 0 et 360
   marge = 0.0;
 
-  if (isTacking){
+  if (isTacking || tackingMode){
     count4tacking();
     if (sens){
       marge = 30.0;      // gestion du tacking
@@ -24,7 +24,6 @@ void Navigation::follow_cap(float cap_a_suivre) {
     }
   }
   cap_a_suivre += marge;
-  Serial.println(cap_a_suivre);
   // Calcul de l’erreur dans [-180, +180] degrés
   float erreur = cap_a_suivre - cap_actuel;
   if (erreur > 180) erreur -= 360;
@@ -85,6 +84,36 @@ void Navigation::count4tacking() {
     tackingMode = false;
     sens = !sens;
   } 
+}
+void Navigation::line_following(GPScoord arrival, GPScoord startline)
+{
+    // Convertir les points GPS en coordonnées cartésiennes
+    Cartcoord a = gps.conversion(startline);
+    Cartcoord b = gps.conversion(arrival);
+    GPScoord posGPS = gps.getPoint(); // Corrigé ici
+    Cartcoord pos = gps.conversion(posGPS);
+
+    // Calcul du vecteur directeur de la ligne normalisé
+    float dx = b.x - a.x;
+    float dy = b.y - a.y;
+    float norm = sqrt(dx * dx + dy * dy);
+    if (norm == 0) return; // éviter une division par zéro
+
+    float nx = dx / norm;
+    float ny = dy / norm;
+
+    // Erreur de distance perpendiculaire à la ligne
+    float error = nx * (pos.y - a.y) - ny * (pos.x - a.x);
+
+    // Commande proportionnelle
+    float commande = Kp * error;
+
+    // Saturation de la commande
+    if (commande > 30) commande = 30;
+    if (commande < -30) commande = -30;
+
+    // Application au gouvernail
+    powerboard.set_angle_rudder((int)commande);
 }
 
 

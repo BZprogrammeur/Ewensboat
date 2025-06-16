@@ -36,13 +36,18 @@ void WindSensor::update() {
         windSpeed = pulseCount * 0.44704;  // Facteur de conversion (à ajuster selon le capteur);
         heading_bytes = analogRead(A15);
         heading = (float)heading_bytes / 1023 * 360;
+
+        if (EMAfilter){
+          filteredHeading = alpha * heading + (1-alpha)*filteredHeading;
+        }
+        
         pulseCount = 0;  // Réinitialisation du compteur
         lastTime = currentTime;
     }
 }
 
 float WindSensor::get_wind_direction() const{
-  return heading;
+  return filteredHeading;
 }
 
 float WindSensor::get_wind_speed() const{

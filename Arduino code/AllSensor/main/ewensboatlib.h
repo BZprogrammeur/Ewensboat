@@ -15,6 +15,7 @@ public:
     
     void follow_cap(float cap_a_suivre);
     void reach_point(GPScoord point);
+    void line_following(GPScoord arrival, GPScoord startline);
     void stopSailing();
     void count4tacking();
     void CheckTacking();

@@ -13,6 +13,9 @@ public:
 
     double getLatitude() const;
     double getLongitude() const;
+    GPScoord getPoint() const;
+    int getSatelliteCount() const;
+    bool parseGPGGA(const String& nmea);
     bool isValid() const;
 
     Cartcoord conversion(GPScoord point);
@@ -22,6 +25,7 @@ private:
     String nmeaBuffer;
     double latitude;
     double longitude;
+    int satellites;
     bool validFix;
 
     bool parseGPRMC(const String& nmea); // Analyse la trame $GPRMC

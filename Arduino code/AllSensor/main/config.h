@@ -22,6 +22,6 @@ struct Cartcoord{
   double y;
 };
 
-const GPScoord M = {48.8566, 2.3522};
+const GPScoord M = {52.4844041, -1.8898449};
 
 #endif
