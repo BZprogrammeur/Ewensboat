@@ -98,3 +98,7 @@ void controlMotor::set_angle_rudder(int angle)
   pulse = map(angle, -30, 30, SERVOMIN_RUDDER, SERVOMAX_RUDDER);
   pwm.setPWM(SERVO_RUDDER, 0, pulse);
 }
+
+float controlMotor::getSailPos(){
+  return angle_sail;
+}

@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include "ewensboatlib.h"
 
-Navigation::Navigation(IMU& imu_, controlMotor& motor_, WindSensor& wind_, GPS& gps_)
+Navigation::Navigation(IMU& imu_, controlMotor& motor_, WindSensor& wind_, GPS2& gps_)
     : imu(imu_), powerboard(motor_), wind(wind_), gps(gps_){
   sens = false;
   isTacking = false;
@@ -33,13 +33,14 @@ void Navigation::follow_cap(float cap_a_suivre) {
   float derivee = (erreur - erreur_precedente) / DELTA_T;
 
   // Commande PD (inversée : angle positif = virage à gauche)
-  float commande = -Kp * erreur - Kd * derivee;
+  float commande = -Kp * erreur; //- Kd * derivee;
 
   // Saturation à l’amplitude max du gouvernail
   if (commande > 30) commande = 30;
   if (commande < -30) commande = -30;
 
   powerboard.set_angle_rudder((int)commande);
+  angle_rudder = commande;
 
   erreur_precedente = erreur;
 }
@@ -72,6 +73,7 @@ void Navigation::reach_point(GPScoord point) {
 void Navigation::stopSailing(){
   powerboard.set_angle_sail(SERVOMAX_SAIL);
   powerboard.set_angle_rudder(0);
+  angle_rudder = 0;
 }
 
 void Navigation::count4tacking() {
@@ -114,6 +116,7 @@ void Navigation::line_following(GPScoord arrival, GPScoord startline)
 
     // Application au gouvernail
     powerboard.set_angle_rudder((int)commande);
+    angle_rudder = commande;
 }
 
 
@@ -124,4 +127,8 @@ void Navigation::CheckTacking() {
 
 bool Navigation::getTacking(){
   return isTacking;
+}
+
+float Navigation::getRudderPos(){
+  return angle_rudder;
 }

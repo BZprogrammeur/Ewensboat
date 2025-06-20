@@ -16,6 +16,7 @@ public:
     void set_angle_sail(int angle);
     void set_angle_rudder(int angle);
     float sawtooth(float x);
+    float getSailPos();
 private:
     Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
     float angle_rudder;
