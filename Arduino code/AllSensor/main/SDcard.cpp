@@ -1,19 +1,18 @@
 #include "SDcard.h"
 
-SDcard::SDcard() {
-    if (!SD.begin(chipSelect)) {
-        Serial.println("Erreur : carte SD non détectée !");
-        return;
-    }
-    Serial.println("Carte SD prête.");
-
-    logFile = SD.open("log.txt", FILE_WRITE);
-    if (logFile) {
-        logFile.println("=== Début du log ===");
-        logFile.close();
-    } else {
-        Serial.println("Erreur : impossible d'ouvrir log.txt");
-    }
+void SDcard::init() {
+  if (!SD.begin(chipSelect)) {
+    Serial.println("Erreur : carte SD non détectée !");
+    return;
+  }
+  Serial.println("Carte SD prête.");
+  logFile = SD.open("log.txt", FILE_WRITE);
+  if (logFile) {
+    logFile.println("=== Début du log ===");
+    logFile.close();
+  } else {
+    Serial.println("Erreur : impossible d'ouvrir log.txt");
+  }
 }
 
 void SDcard::saveDatas(float time, float latitude, float longitude,

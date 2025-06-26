@@ -7,7 +7,8 @@
 
 class SDcard {
 public:
-    SDcard();
+    SDcard() = default;
+    void init(); 
     void saveDatas(float time, float latitude, float longitude,
                    float wind_direction, float wind_speed, float heading,
                    int angle_rud, int angle_sail, bool control);

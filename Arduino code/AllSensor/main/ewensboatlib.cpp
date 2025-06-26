@@ -9,7 +9,6 @@ Navigation::Navigation(IMU& imu_, controlMotor& motor_, WindSensor& wind_, GPS2&
   }
 
 void Navigation::follow_cap(float cap_a_suivre) {
-  imu.update();
   CheckTacking();
   float cap_actuel = imu.get_cap(); // Renvoie un cap entre 0 et 360
   marge = 0.0;
@@ -46,8 +45,6 @@ void Navigation::follow_cap(float cap_a_suivre) {
 }
 
 void Navigation::reach_point(GPScoord point) {
-  gps.update();  // Met à jour les données GPS
-
   // Conversion du point cible
   Cartcoord target_cart = gps.conversion(point);
   double x_target = target_cart.x;
@@ -107,6 +104,20 @@ void Navigation::line_following(GPScoord arrival, GPScoord startline)
     // Erreur de distance perpendiculaire à la ligne
     float error = nx * (pos.y - a.y) - ny * (pos.x - a.x);
 
+    CheckTacking();
+    marge = 0.0;
+  
+    if (isTacking || tackingMode){
+      count4tacking();
+      if (sens){
+        marge = 30.0;      // gestion du tacking
+      }
+      else {
+        marge = -30.0;
+      }
+    }
+    error += marge;
+    
     // Commande proportionnelle
     float commande = Kp * error;
 
@@ -116,7 +127,7 @@ void Navigation::line_following(GPScoord arrival, GPScoord startline)
 
     // Application au gouvernail
     powerboard.set_angle_rudder((int)commande);
-    angle_rudder = commande;
+    angle_rudder = commande; //pour les logs
 }
 
 

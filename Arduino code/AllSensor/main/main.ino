@@ -20,30 +20,33 @@ int display_count = 0;
 
 void setup() {
   Serial.begin(9600);
+  Serial.print("démarrage du boat");
   imu.init();
   gps_boat.init();
   powerboard.init();
   wind.init();
   manette.init();
+  sd.init();
 }
 
 void loop() {
   manette.setUnmanned();
   maj();
   display();
-//  if (manette.unmanned)
-//  {
+  save_data();
+  if (manette.unmanned)
+  {
     
 //    float cap_cible = 90.0;  // cap cible en degrés
 //    nav.follow_cap(cap_cible);
     GPScoord point_cible = {52.4844041, -1.8898449};
     nav.reach_point(point_cible);
    
-//  }
-//  else
-//  {
-//    manette.controling();
-//  }
+  }
+  else
+  {
+    manette.controling();
+  }
 }
 
 void display()
