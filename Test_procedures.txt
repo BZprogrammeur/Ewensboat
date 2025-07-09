@@ -1,0 +1,46 @@
+-> Start by training to control the boat with the remote
+
+-> Make a program so that the boat moves its rudder in a certain way when it's IMU is calirated and is ready to go.
+-> Same when the robot starts to receive proper GPS Data.
+
+First test : Cap following
+
+-> Edit the program so that it saves the logs in different files each time.
+-> Maybe try it both with PD controler and with only proportionnal controler
+-> Have the program run for a whole minute.
+-> Once the programs works as intended without tacking, test it in a tacking configuration.
+
+	The canal might be a bit too narrow for this test and the boat might deflect toward its sides. Therefore a test 
+in a wider space might be more relevant here or at least easier. Particularly, tacking might be particularly 
+difficult to operate in the canal even though it might also make a good challenge. To operate tacking, the usage of
+a position-based method rather than a time-nased method should be considered as this would allow to avoid the canal
+'s sides. However such use of tacking would most lickelye be easier to implement with line following. Thus the 
+question of whether implementing a follow cap function with tacking can and should be asked.
+
+
+Second test : Point reaching
+
+-> Define a proper way to decide when the boat has reached its point
+-> First only ask the boat to reach a certain point at least 15 meters away without tacking
+-> Then have the boat do the same in a tacking situation
+-> Finally have the boat follow some trajectory with several points in a proper order.
+
+	This test is mostly intended to test the proper use and functionning of the GPS as as for the GPS, this 
+mission can be done more effectively using a linefollowing algorithm.
+
+Third test : Line following
+
+-> Most important test and the most relevant in the canal as it is a pretty narrow environment for the boat.
+-> Test it at first on a long distance without tacking with a line in the center of the canal, and check that the 
+boat does indeed stay in the middle of the canal.
+-> Then same test in a tacking situation.
+-> Then we can do a test with a trajectory made of several lines as following.
+
+	The most important tet since being able to follow a line with the boat is our main objective here.
+
+Fourth Test : Station keeping
+
+-> Program for this mission not done yet but should be easy to do using line following.
+-> Have the boat maintain a certain position for a long ennough time (For example 5 minutes).
+
+	Bonus test and mission to confirm that we are able to control our boat finely.
