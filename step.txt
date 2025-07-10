@@ -1,0 +1,26 @@
+1-Le jour du test choisir une portion du canal avec le vent de travers
+2-Aller à cette portion avec nos ordis chargés
+3-Attendre le calibrage de l'imu et du GPS en étant branché à l'ordinateur
+4-Fermer le boîtier hermétiquement
+5-Commander le boat manuellement 
+
+6a-si réussite :
+	Lancer le follow_cap sans taking (checker que le boat ne fasse pas n'imp avant de l'envoyer)
+	7a-si réussite :
+		Lancer le reach point sans taking
+		8aa-si réussite :
+			lancer le line following sans taking
+			9a-si réussite :
+				chercher un étang pour tester tacking (on aura déjà bien travaillé)
+			9b-si échec:
+				Mettre le log sur l'ordinateur et tenter de comprendre
+		8ab-si échec:
+			Mettre le log sur l'ordinateur et tenter de comprendre	
+	7b-si échec:
+		Mettre le log sur l'ordinateur et tenter de comprendre
+		8ba-si on ne comprend pas :
+			réessayer 
+		8bb-si on comprend :
+			corriger l'erreur puis relancer		
+6b-si échec :
+	s'entraîner

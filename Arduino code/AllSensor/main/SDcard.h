@@ -15,6 +15,8 @@ public:
 
 private:
     const int chipSelect = 53;  // Pin CS pour la carte SD (Mega 2560)
+    unsigned long lastLog = 0;
+    unsigned long interval = 5000;
     File logFile;
 };
 

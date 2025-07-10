@@ -130,6 +130,16 @@ void Navigation::line_following(GPScoord arrival, GPScoord startline)
     angle_rudder = commande; //pour les logs
 }
 
+void Navigation::set_sail_pos(){
+  float wind_angle = wind.get_wind_direction();
+  if (wind_angle>180)
+  {
+    wind_angle = 360-wind_angle;
+  }
+  float sail_angle = map(abs(wind_angle), 0, 180, 0, 90);
+  powerboard.set_angle_sail(sail_angle);  
+}
+
 
 void Navigation::CheckTacking() {
   float windDirection = wind.get_wind_direction();

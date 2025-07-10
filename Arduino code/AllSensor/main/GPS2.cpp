@@ -12,13 +12,14 @@ void GPS2::init(unsigned long baud) {
     gps->sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
     delay(1000);
 }
-
 void GPS2::update() {
+  while (gps->available()) {
     char c = gps->read();
     if (gps->newNMEAreceived()) {
-        if (!gps->parse(gps->lastNMEA())) return;
-        validFix = gps->fix;
+      if (!gps->parse(gps->lastNMEA())) return;
+      validFix = gps->fix;
     }
+  }
 }
 
 double GPS2::getLatitude() const {

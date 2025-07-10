@@ -37,11 +37,11 @@ void loop() {
   if (manette.unmanned)
   {
     
-//    float cap_cible = 90.0;  // cap cible en degrés
-//    nav.follow_cap(cap_cible);
-    GPScoord point_cible = {52.4844041, -1.8898449};
-    nav.reach_point(point_cible);
-   
+    float cap_cible = 135.0;  // cap cible en degrés
+    nav.follow_cap(cap_cible);
+//    GPScoord point_cible = {52.4844041, -1.8898449};
+//    nav.reach_point(point_cible);
+    nav.set_sail_pos();
   }
   else
   {

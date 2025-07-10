@@ -21,6 +21,7 @@ public:
     void CheckTacking();
     bool getTacking();
     float getRudderPos();
+    void set_sail_pos();
 
     
 private:
