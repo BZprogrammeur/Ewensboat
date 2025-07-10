@@ -69,7 +69,7 @@ void nav::update_logs(){
   logfile.print(' ');
   logfile.print(powerboard->get_com_sail());
   logfile.print(' ');
-  logfile.println(controler->isUnmanned());
+  logfile.println(controler->unmanned_status());
   logfile.close();
   //TODO : adapt controler class to finish the log function
   return;
@@ -91,7 +91,7 @@ void nav::update(){
 
 void nav::follow_cap(float cap_a_suivre) {
   update();
-  if(controler->isUnmanned()){
+  if(controler->checkUnmanned()){
   float cap_actuel = imu->get_heading(); // Renvoie un cap entre -180 et 180 degrees
   // Calcul de l’erreur dans [-180, +180] degrés
   float erreur = cap_a_suivre - cap_actuel;
@@ -106,6 +106,7 @@ void nav::follow_cap(float cap_a_suivre) {
     powerboard->send_com_rudder(controler->get_com_rudder());
     powerboard->send_com_sail(controler->get_com_sail());
   }
+  delay(100);
   return;
 }
 
@@ -128,7 +129,7 @@ void nav::set_sail_pos(){
 
 void nav::linefollowing(float lata, float longa, float latb, float longb){
   update();
-  if(controler->isUnmanned()){
+  if(controler->checkUnmanned()){
     update();
     // from the Matlab simulation coded by Pr. Jian Wan
     // % a --- the starting point;
@@ -195,6 +196,7 @@ void nav::linefollowing(float lata, float longa, float latb, float longb){
     powerboard->send_com_rudder(controler->get_com_rudder());
     powerboard->send_com_sail(controler->get_com_sail());
   }
+  delay(100);
   return;
   }
 

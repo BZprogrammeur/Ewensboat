@@ -18,17 +18,7 @@ a position-based method rather than a time-nased method should be considered as 
 question of whether implementing a follow cap function with tacking can and should be asked.
 
 
-Second test : Point reaching
-
--> Define a proper way to decide when the boat has reached its point
--> First only ask the boat to reach a certain point at least 15 meters away without tacking
--> Then have the boat do the same in a tacking situation
--> Finally have the boat follow some trajectory with several points in a proper order.
-
-	This test is mostly intended to test the proper use and functionning of the GPS as as for the GPS, this 
-mission can be done more effectively using a linefollowing algorithm.
-
-Third test : Line following
+Second test : Line following
 
 -> Most important test and the most relevant in the canal as it is a pretty narrow environment for the boat.
 -> Test it at first on a long distance without tacking with a line in the center of the canal, and check that the 
@@ -38,9 +28,9 @@ boat does indeed stay in the middle of the canal.
 
 	The most important tet since being able to follow a line with the boat is our main objective here.
 
-Fourth Test : Station keeping
+Third Test : Station keeping
 
 -> Program for this mission not done yet but should be easy to do using line following.
 -> Have the boat maintain a certain position for a long ennough time (For example 5 minutes).
 
-	Bonus test and mission to confirm that we are able to control our boat finely.
+	Bonus test and mission to confirm that we are able to control our boat properly

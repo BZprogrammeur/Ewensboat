@@ -43,7 +43,9 @@ bool GPS::parseGPRMC(const String& nmea) {
         }
     }
 
-    if (parts[2] != "A") return false; // 'A' = valid data
+    if (parts[2] != "A"){
+      return false; // 'A' = valid data
+    }
 
     String rawLat = parts[3];
     String latDir = parts[4];

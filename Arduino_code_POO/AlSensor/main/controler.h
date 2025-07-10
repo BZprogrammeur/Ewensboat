@@ -11,7 +11,8 @@ public:
     int get_elevation();
     int get_aileron();
     void update_commands();
-    bool isUnmanned();
+    bool unmanned_status();
+    bool checkUnmanned();
     int get_control_value();
     int get_com_rudder();
     int get_com_sail();

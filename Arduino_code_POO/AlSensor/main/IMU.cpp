@@ -26,13 +26,13 @@ void IMU::update()
 }
 
 float IMU::get_heading(){
-  update();
   //Serial.print("Current heading:");
   //Serial.println(cap);
   return ;
 }
 
 bool IMU::calibrate(){
+  // Code made by Titouan Leost : https://github.com/TitouanLeost/Aston-Autonomous-Sailboat-2024
   // Erasing calibration data stored in the IMU:
   Serial.println("Calibration started...");
   CMPS12_SERIAL.write(0xE0);
@@ -49,13 +49,15 @@ bool IMU::calibrate(){
   while(CMPS12_SERIAL.available() < 1);
   unsigned char status = CMPS12_SERIAL.read();
   int count = 0;
-  while(count < 50 or status != 255) {
+  while(count < 50 or status < 243) {
     CMPS12_SERIAL.write(CMPS12_CALIBRATION_STATUS);
     while(CMPS12_SERIAL.available() < 1);
     status = CMPS12_SERIAL.read();
     Serial.println(int(status), BIN);
-    if(status == 255)
+    if(status >= 243){
         count += 1;
+    }
+    delay(100);
   }
   Serial.println("Calibration done");
   return true;

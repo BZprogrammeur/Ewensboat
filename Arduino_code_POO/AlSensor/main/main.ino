@@ -12,5 +12,5 @@ void setup() {
 }
 
 void loop() {
-  navigator->update();
+  navigator->follow_cap(90.);
 }
