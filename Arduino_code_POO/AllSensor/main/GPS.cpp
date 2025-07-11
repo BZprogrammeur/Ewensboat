@@ -18,6 +18,10 @@ void GPS::update() {
       validFix = gps->fix;
     }
   }
+  // Serial.print("Longitude : ");
+  // Serial.println(longitude);
+  // Serial.print("Latitude : ");
+  // Serial.println(latitude);
 }
 
 double GPS::getLatitude() const {

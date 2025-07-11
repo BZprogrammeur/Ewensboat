@@ -20,8 +20,8 @@ void IMU::update()
   angle16 <<= 8;
   angle16 += low_byte;
   cap = angle16 / 10 + (float)(angle16%10)/10 - 180; 
-  Serial.print("Angle:");
-  Serial.println(cap);
+  // Serial.print("Angle:");
+  // Serial.println(cap);
   return;           
 }
 
