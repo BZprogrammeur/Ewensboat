@@ -28,7 +28,7 @@ void IMU::update()
 float IMU::get_heading(){
   //Serial.print("Current heading:");
   //Serial.println(cap);
-  return ;
+  return cap;
 }
 
 bool IMU::calibrate(){
@@ -49,16 +49,25 @@ bool IMU::calibrate(){
   while(CMPS12_SERIAL.available() < 1);
   unsigned char status = CMPS12_SERIAL.read();
   int count = 0;
-  while(count < 50 or status < 243) {
+  while(count < 50 or status!= 0b11111111) {
     CMPS12_SERIAL.write(CMPS12_CALIBRATION_STATUS);
     while(CMPS12_SERIAL.available() < 1);
     status = CMPS12_SERIAL.read();
     Serial.println(int(status), BIN);
-    if(status >= 243){
+    if(status == 0b11111111){
         count += 1;
     }
-    delay(100);
+    delay(10);
   }
+  CMPS12_SERIAL.write(0xF0);
+  while(CMPS12_SERIAL.available() < 1);
+  CMPS12_SERIAL.read();
+  CMPS12_SERIAL.write(0xF5);
+  while(CMPS12_SERIAL.available() < 1);
+  CMPS12_SERIAL.read();
+  CMPS12_SERIAL.write(0xF6);
+  while(CMPS12_SERIAL.available() < 1);
+  CMPS12_SERIAL.read();
   Serial.println("Calibration done");
   return true;
 }

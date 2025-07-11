@@ -10,7 +10,6 @@ nav::nav() : Kp(2.0), Kd(1.0), DELTA_T(0.1) {
   Serial.println("Initialising sailboat...");
   powerboard = new controlMotor();
   Serial.println("Motors ready.");
-  init_sequence_rud();
   imu = new IMU();
   Serial.println("IMU ready.");
   init_sequence_rud();
@@ -99,8 +98,9 @@ void nav::follow_cap(float cap_a_suivre) {
   if (erreur < -50.) erreur = -50.;
   //Serial.print("Erreur calculée:  ");
   //Serial.println(erreur);
-  powerboard->set_angle_rudder((int)erreur);
+  powerboard->set_angle_rudder(-(int)erreur);
   erreur_precedente = erreur;
+  set_sail_pos();
   }
   else{
     powerboard->send_com_rudder(controler->get_com_rudder());
@@ -116,7 +116,7 @@ void nav::set_sail_pos(){
   //Serial.println(wind_angle);
   float sail_angle;
   if(abs(wind_angle) <= 50){
-    sail_angle = 0.;
+    sail_angle = 90.;
   }
   else{
     sail_angle = map(abs(wind_angle), 50, 180, 0, 90);
