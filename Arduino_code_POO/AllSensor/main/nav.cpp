@@ -16,11 +16,11 @@ nav::nav() : Kp(2.0), Kd(1.0), DELTA_T(0.1) {
   wind = new WindSensor();
   Serial.println("Wind sensor ready.");
   gps = new GPS(Serial2);
-  while(!gps->isValid()){
-    powerboard->set_angle_rudder(50 * cos(2 * PI *millis() / (5000)));
-    gps->update();
-  }
-  Serial.println("GPS ready.");
+  // while(!gps->isValid()){
+  //   powerboard->set_angle_rudder(50 * cos(2 * PI *millis() / (5000)));
+  //   gps->update();
+  // }
+  // Serial.println("GPS ready.");
   controler = new Controler();
   Serial.println("Controler ready.");
   if (!SD.begin(PIN_SPI_CS)) {
@@ -57,10 +57,9 @@ void nav::update_logs(){
   File logfile = SD.open(filename, FILE_WRITE);
   logfile.print(millis());
   logfile.print(' ');
-  GPScoord pos_gps = gps->getPoint();
-  logfile.print(pos_gps.lat);
+  logfile.print(gps->getLatitude(), 12);
   logfile.print(' ');
-  logfile.print(pos_gps.lng);
+  logfile.print(gps->getLongitude(), 12);
   logfile.print(' ');
   logfile.print(imu->get_heading());
   logfile.print(' ');
@@ -87,6 +86,8 @@ nav::~nav() {
 void nav::update(){
   imu->update();
   wind->update_heading();
+  Serial.println(wind->get_wind_direction());
+  // wind speed automatically updates every 2.25 seconds.
   gps->update();
   update_logs();
   return;

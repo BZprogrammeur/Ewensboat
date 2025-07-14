@@ -12,5 +12,6 @@ void setup() {
 }
 
 void loop() {
-  navigator->follow_cap(90.);
+  navigator->update();
+  // navigator->linefollowing(52.4862971, -1.8895251, 52.486735, -1.889113);
 }

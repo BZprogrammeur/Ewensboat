@@ -50,9 +50,8 @@ Cartcoord GPS::conversion(GPScoord point) {
   double dLat = lat2 - lat1;
   double dLng = (point.lng - M.lng) * M_PI / 180.0;
 
-  // Approximation de projection plane (petites distances)
-  result.x = R_EARTH * dLng * cos((lat1 + lat2) / 2.0); // Est
-  result.y = R_EARTH * dLat;                            // Nord
+  result.x = R_EARTH * dLng * cos(lat1);                // East
+  result.y = R_EARTH * dLat;                            // North
 
   return result;
 }
