@@ -16,11 +16,11 @@ nav::nav() : Kp(2.0), Kd(1.0), DELTA_T(0.1) {
   wind = new WindSensor();
   Serial.println("Wind sensor ready.");
   gps = new GPS(Serial2);
-  // while(!gps->isValid()){
-  //   powerboard->set_angle_rudder(50 * cos(2 * PI *millis() / (5000)));
-  //   gps->update();
-  // }
-  // Serial.println("GPS ready.");
+  while(!gps->isValid()){
+    powerboard->set_angle_rudder(50 * cos(2 * PI *millis() / (5000)));
+    gps->update();
+  }
+  Serial.println("GPS ready.");
   controler = new Controler();
   Serial.println("Controler ready.");
   if (!SD.begin(PIN_SPI_CS)) {
@@ -213,7 +213,6 @@ int getMaxLogIndex() {
   while (true) {
     File entry = root.openNextFile();
     if (!entry) {
-      // Plus de fichiers
       break;
     }
 
@@ -221,7 +220,6 @@ int getMaxLogIndex() {
     entry.close();
 
     if (filename.startsWith("NAVLOG") && filename.endsWith(".TXT")) {
-      // Extraire la partie numérique
       String numberPart = filename.substring(6, filename.length() - 4);
       int index = numberPart.toInt();
       if (index > maxIndex) {
