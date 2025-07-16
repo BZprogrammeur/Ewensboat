@@ -6,9 +6,8 @@ import matplotlib.pyplot as plt
 
 
 def read_log(log_number : int) -> np.ndarray:
-    logfilename = 'Log_files/navlog' + str(log_number) + '.txt'
+    logfilename = 'Log_files/NAVLOG' + str(log_number) + '.TXT'
     logfile = open(logfilename, 'r')
-    line = 'Starting...'
     logs = []
     line = logfile.readline()
     while line:
@@ -23,7 +22,7 @@ def get_latest_log_number() -> int:
     file_list = os.listdir('Log_files')
     max_number = 0
     for filename in file_list:
-        if filename[0:6] == 'navlog' and int(filename[6:-4]) > max_number and filename[-4:] == '.txt':
+        if filename[0:6] == 'NAVLOG' and int(filename[6:-4]) > max_number and filename[-4:] == '.TXT':
             max_number = int(filename[6:-4])
     return max_number
 
@@ -38,6 +37,35 @@ def draw_trajectory(logs : np.ndarray) -> None:
     ax.set_title("Boat's trajectory")
     return
 
+def toKML(log_number : int):
+    # https://developers.google.com/kml/documentation/kml_tut
+    logfilename = 'Log_files/NAVLOG' + str(log_number) + '.TXT'
+    kmlfilename = 'KML_files/KML_' + str(log_number) + '.kml'
+    logfile = open(logfilename, 'r')
+    kmlfile = open(kmlfilename, 'w')
+    kmlfile.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+    kmlfile.write('<kml xmlns="http://www.opengis.net/kml/2.2">\n')
+    kmlfile.write('  <Document>\n')
+    kmlfile.write('    <name>' + kmlfilename + '</name>\n')
+    kmlfile.write('    <Placemark>\n')
+    kmlfile.write('      <name>' + kmlfilename + '</name>\n')
+    kmlfile.write('      <Linestring>\n')
+    kmlfile.write('        <coordinates>\n')
+    logs = []
+    line = logfile.readline()
+    while line:
+        values = line.split()
+        kmlfile.write('          ' + values[2] + ',' + values[1] + '\n')
+        line = logfile.readline()
+    kmlfile.write('        </coordinates>\n')
+    kmlfile.write('      </Linestring>\n')
+    kmlfile.write('    </Placemark>\n')
+    kmlfile.write('  </Document>\n')
+    kmlfile.write('</kml>')
+
+    logfile.close()
+    kmlfile.close()
+
 def map2(x : float, in_min : float, in_max : float, out_min : float, out_max : float) -> float:
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 
@@ -47,23 +75,34 @@ def conv_rud_com_to_pos(com: np.ndarray) -> np.ndarray:
 def conv_sail_com_to_pos(com: np.ndarray) -> np.ndarray:
     return np.clip(map2(com, 180, 280, 0, 90), 0, 90)
     
-def generate_animation(logs : np.ndarray) -> None:
+def generate_animation(logs : np.ndarray, ref_point : np.ndarray, start_point : np.ndarray, end_point : np.ndarray) -> None:
+    ref_point *= np.pi/180
+    start_point *= np.pi/180
+    end_point *= np.pi/180
     lat = logs[1] * np.pi / 180
     long = logs[2] * np.pi / 180
     head = logs[3] * np.pi / 180
     rud_angles = conv_rud_com_to_pos(logs[4]) * np.pi / 180
     sail_angles = conv_sail_com_to_pos(logs[5]) * np.pi / 180
     R = 6371e3
-    x = R * (long - long[0]) * np.cos(lat[0])
-    y = R * (lat - lat[0])
+    xa = R * (start_point[1] - ref_point[1]) * np.cos(ref_point[0])
+    print(f'xa = {xa}')
+    ya = R * (start_point[0] - ref_point[0])
+    print(f'ya = {ya}')
+    xb = R * (end_point[1] - ref_point[1]) * np.cos(ref_point[0])
+    print(f'xb = {xb}')
+    yb = R * (end_point[0] - ref_point[0])
+    print(f'yb = {yb}')
+    x = R * (long - ref_point[1]) * np.cos(ref_point[0])
+    y = R * (lat - ref_point[0])
     print(f'x = {x}')
     print(f'y = {y}')
     time = logs[0]
     fig, ax = plt.subplots()
-    ax.xmin=-50
-    ax.xmax=50
-    ax.ymin=-50
-    ax.ymax=50
+    ax.xmin=-100
+    ax.xmax=100
+    ax.ymin=-100
+    ax.ymax=100
     size_factor = 3
     dir_wind = (logs[4] - logs[3]) * np.pi / 180
     boat_shape = size_factor * np.array([[-0.25, 0, 0.25, 0.25, -0.25, -0.25],
@@ -77,7 +116,7 @@ def generate_animation(logs : np.ndarray) -> None:
         ax.clear()
         ax.set_xlim(ax.xmin,ax.xmax)
         ax.set_ylim(ax.ymin,ax.ymax)
-        print(f'i = {i}')
+        # print(f'i = {i}')
         R_boat = np.array([[np.cos(head[i]), -np.sin(head[i])],
                            [np.sin(head[i]), np.cos(head[i])]]) 
         R_rud = np.array([[np.cos(rud_angles[i]), -np.sin(rud_angles[i])],
@@ -88,10 +127,16 @@ def generate_animation(logs : np.ndarray) -> None:
                            [np.sin(dir_wind[i]), np.cos(dir_wind[i])]])
         arrow_tip = R_wind @ np.array([[0.], [0.1]])
         arrow_tip_pos = (arrow_pos[0] + arrow_tip[0, 0], arrow_pos[1] + arrow_tip[1, 0])
-        print((R_boat @ boat_shape)[0] + x[i])
+        # print((R_boat @ boat_shape)[0] + x[i])
         ax.plot((R_boat @ boat_shape)[0] + x[i], (R_boat @ boat_shape)[1] + y[i])
         ax.plot((R_sail @ R_boat @ sail_shape)[0] + x[i], (R_sail @ R_boat @ sail_shape)[1] + y[i])
         ax.plot((R_rud @ R_boat @ rud_shape)[0] + x[i], (R_rud @ R_boat @ rud_shape)[1] + y[i] - 2 * size_factor)
+        print(f'xa = {xa}')
+        print(f'ya = {ya}')
+        print(f'xb = {xb}')
+        print(f'yb = {yb}')
+        ax.plot([xa, xb], [ya, yb])
+        ax.plot(x[:i+1], y[:i+1], 'b')
         ax.annotate(
             '', 
             xy=arrow_tip_pos, xycoords='axes fraction',
@@ -101,11 +146,16 @@ def generate_animation(logs : np.ndarray) -> None:
         ax.text(0.7, 0.8, f'Apparent wind speed : {logs[5][i]}',
                 transform=ax.transAxes,
                 fontsize=8)
-
-        plt.pause(1)
+        try:
+            plt.pause((time[i+1] - time[i])/1000)
+        except IndexError:
+            pass
     return
 
 if __name__ == '__main__' :
-    print(generate_animation(read_log(get_latest_log_number())))
-     
+    ref_point = np.array([52.4863774, -1.8894429])
+    start_point = np.array([52.4863774, -1.8894429])
+    end_point = np.array([52.486813, -1.888868])
+    # generate_animation(read_log(get_latest_log_number()), ref_point, start_point, end_point)
+    toKML(15)
     
