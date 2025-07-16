@@ -1,43 +1,37 @@
 #include "GPS.h"
 
-GPS::GPS(HardwareSerial& serial) : gpsSerial(serial) {
-    gps = new Adafruit_GPS(&gpsSerial);  // Initialisation correcte
-    validFix = false;
-    gpsSerial.begin(9600);
-    gps->begin(9600);
-    gps->sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
-    gps->sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
-    delay(100);
+GPS::GPS() {
+  gps = new TinyGPSPlus();
+  validdata = false;
+  delay(100);
+  Serial2.begin((9600));
 }
 
 void GPS::update() {
-  while (gps->available()) {
-    char c = gps->read();
-    if (gps->newNMEAreceived()) {
-      if (!gps->parse(gps->lastNMEA())) return;
-      validFix = gps->fix;
+  while (Serial2.available() > 0)
+    if (gps->encode(Serial2.read())){
+      validdata = gps->location.isValid();
+      if(validdata){
+        latitude = gps->location.lat();
+        longitude = gps->location.lng();
+      }
     }
-  }
-  // Serial.print("Longitude : ");
-  // Serial.println(longitude);
-  // Serial.print("Latitude : ");
-  // Serial.println(latitude);
 }
 
 double GPS::getLatitude() const {
-    return gps->latitudeDegrees;
+  return latitude;
 }
 
 double GPS::getLongitude() const {
-    return gps->longitudeDegrees;
+  return longitude;
 }
 
 GPScoord GPS::getPoint() const {
-    return GPScoord{getLatitude(), getLongitude()};
+  return GPScoord{getLatitude(), getLongitude()};
 }
 
 bool GPS::isValid() const {
-    return validFix;
+  return validdata;
 }
 
 

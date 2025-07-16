@@ -3,8 +3,7 @@
 
 #include <Arduino.h>
 #include "config.h"
-#include <TinyGPSPlus.h>
-// https://github.com/mikalhart/TinyGPSPlus/
+#include <Adafruit_GPS.h>
 
 struct GPScoord{
   double lat;
@@ -20,7 +19,7 @@ const GPScoord M = {52.4844041, -1.8898449};
 
 class GPS {
 public:
-    GPS();
+    GPS(HardwareSerial& serial);
 
     void update(); // Lit les trames NMEA, extrait les coordonnées si valides
 
@@ -33,12 +32,13 @@ public:
     Cartcoord conversion(GPScoord point);
 
 private:
-    TinyGPSPlus* gps = nullptr;
+    HardwareSerial& gpsSerial;
     String nmeaBuffer;
     double latitude;
     double longitude;
     int satellites;
-    bool validdata;
+    bool validFix;
+    Adafruit_GPS* gps;
     bool parseGPRMC(const String& nmea); // Analyse la trame $GPRMC
     double convertToDecimal(const String& raw, const String& direction); // Convertit DMM -> degrés décimaux
 };

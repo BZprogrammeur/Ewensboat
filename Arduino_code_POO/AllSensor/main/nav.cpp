@@ -15,7 +15,7 @@ nav::nav() : Kp(2.0), Kd(1.0), DELTA_T(0.1) {
   init_sequence_rud();
   wind = new WindSensor();
   Serial.println("Wind sensor ready.");
-  gps = new GPS(Serial2);
+  gps = new GPS();
   while(!gps->isValid()){
     powerboard->set_angle_rudder(50 * cos(2 * PI *millis() / (5000)));
     gps->update();

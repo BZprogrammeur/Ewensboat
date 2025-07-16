@@ -7,7 +7,7 @@ IMU::IMU()
   Serial.println("Initialising IMU...");
   cap = 0.0;
   CMPS12_SERIAL.begin(9600);
-  calibrate();
+  // calibrate();
 }
 
 void IMU::update()

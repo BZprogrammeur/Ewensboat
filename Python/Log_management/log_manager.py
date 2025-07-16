@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 %matplotlib qt
+import simplekml
 
 
 def read_log(log_number : int) -> np.ndarray:
@@ -39,32 +40,23 @@ def draw_trajectory(logs : np.ndarray) -> None:
 
 def toKML(log_number : int):
     # https://developers.google.com/kml/documentation/kml_tut
+    # https://simplekml.readthedocs.io/en/latest/index.html
     logfilename = 'Log_files/NAVLOG' + str(log_number) + '.TXT'
     kmlfilename = 'KML_files/KML_' + str(log_number) + '.kml'
+    kml = simplekml.Kml()
+    ls = kml.newlinestring(name='GPS data from NAVLOG' + str(log_number) + '.TXT')
+    ls.style.linestyle.width = 5
+    ls.style.linestyle.color = simplekml.Color.blue
     logfile = open(logfilename, 'r')
-    kmlfile = open(kmlfilename, 'w')
-    kmlfile.write('<?xml version="1.0" encoding="UTF-8"?>\n')
-    kmlfile.write('<kml xmlns="http://www.opengis.net/kml/2.2">\n')
-    kmlfile.write('  <Document>\n')
-    kmlfile.write('    <name>' + kmlfilename + '</name>\n')
-    kmlfile.write('    <Placemark>\n')
-    kmlfile.write('      <name>' + kmlfilename + '</name>\n')
-    kmlfile.write('      <Linestring>\n')
-    kmlfile.write('        <coordinates>\n')
-    logs = []
+    gps_data = []
     line = logfile.readline()
     while line:
         values = line.split()
-        kmlfile.write('          ' + values[2] + ',' + values[1] + '\n')
+        gps_data.append((values[2], values[1]))
         line = logfile.readline()
-    kmlfile.write('        </coordinates>\n')
-    kmlfile.write('      </Linestring>\n')
-    kmlfile.write('    </Placemark>\n')
-    kmlfile.write('  </Document>\n')
-    kmlfile.write('</kml>')
-
+    ls.coords = gps_data
     logfile.close()
-    kmlfile.close()
+    kml.save(kmlfilename)
 
 def map2(x : float, in_min : float, in_max : float, out_min : float, out_max : float) -> float:
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -157,5 +149,5 @@ if __name__ == '__main__' :
     start_point = np.array([52.4863774, -1.8894429])
     end_point = np.array([52.486813, -1.888868])
     # generate_animation(read_log(get_latest_log_number()), ref_point, start_point, end_point)
-    toKML(15)
+    toKML(18)
     
