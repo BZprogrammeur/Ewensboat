@@ -11,6 +11,7 @@ nav::nav() : Kp(2.0), Kd(1.0), DELTA_T(0.1) {
   Serial.println("Wind sensor ready.");
   gps = new GPS();
   while(!gps->isValid()){
+    Serial.println("Searching for GPS...");
     powerboard->set_angle_rudder(50 * cos(2 * PI *millis() / (5000)));
     gps->update();
   }
@@ -185,8 +186,12 @@ void nav::linefollowing(float lata, float longa, float latb, float longb){
     else{
       aimed_angle=angle_nominal;
     }
+    // Serial.print("Target angle:");
+    // Serial.println(aimed_angle);
     float angle_rudder;
     angle_rudder = min(max(-angle_ruddermax, angle_ruddermax*sin(heading-aimed_angle)), angle_ruddermax);
+    // Serial.print("Angle rudder:");
+    // Serial.println(angle_rudder);
     powerboard->set_angle_rudder(angle_rudder);
     set_sail_pos();
   }
@@ -201,6 +206,8 @@ void nav::linefollowing(float lata, float longa, float latb, float longb){
 float nav::get_true_wind_dir(){
   // According to previous internship reports and : https://www.bwsailing.com/cc/2017/05/calculating-the-true-wind-and-why-it-matters/
   float SOG = gps->getSOG();
+  // Serial.print("SOG: ");
+  // Serial.println(SOG);
   float COG = imu->get_heading() * PI / 180; // technically false but good enough approximation as the GPS is very unprecise and the boat doesn't drift much.
   float AWS = wind->get_wind_speed();
   float AWD = wind->get_wind_direction() * PI / 180;

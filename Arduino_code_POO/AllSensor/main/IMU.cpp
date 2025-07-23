@@ -23,9 +23,9 @@ void IMU::update()
   unsigned int angle16 = high_byte;           // Calculate 16 bit angle
   angle16 <<= 8;
   angle16 += low_byte;
-  cap = sawtooth(angle16 / 10 + (float)(angle16%10)/10 - 180); // heading = 0 if the boat is heading north.
-  // Serial.print("Angle:");
-  // Serial.println(cap);
+  cap = sawtooth((angle16 / 10 + (float)(angle16%10)/10 - 180) * PI / 180) * 180 / PI; // heading = 0 if the boat is heading north.
+  Serial.print("Heading:");
+  Serial.println(cap);
   return;           
 }
 
