@@ -28,7 +28,7 @@ void controlMotor::set_angle_sail(int angle)
 
 void controlMotor::set_angle_rudder(int angle)
 {
-  com_rud = map(angle, -50, 50, SERVOMIN_RUDDER, SERVOMAX_RUDDER);
+  com_rud = map(angle, -50, 50, SERVOMAX_RUDDER, SERVOMIN_RUDDER);
   pwm.setPWM(SERVO_RUDDER, 0, com_rud);
 }
 
