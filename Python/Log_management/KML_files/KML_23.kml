@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2">
+    <Document id="25">
+        <Style id="28">
+            <LineStyle id="29">
+                <color>ffff0000</color>
+                <colorMode>normal</colorMode>
+                <width>5</width>
+            </LineStyle>
+        </Style>
+        <Placemark id="27">
+            <name>GPS data from NAVLOG23.TXT</name>
+            <styleUrl>#28</styleUrl>
+            <LineString id="26">
+                <coordinates>-1.889448356628,52.484611511230,0.0 -1.889448356628,52.484611511230,0.0 -1.889448356628,52.484611511230,0.0 -1.889448356628,52.484611511230,0.0 -1.889448356628,52.484611511230,0.0</coordinates>
+            </LineString>
+        </Placemark>
+    </Document>
+</kml>
