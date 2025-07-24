@@ -1,5 +1,16 @@
 #include "nav.h"
 
+double scalprod(Cartcoord A, Cartcoord B){
+  return A.x * B.x + A.y * B.y;
+}
+
+Cartcoord diff(Cartcoord A, Cartcoord B){
+  Cartcoord C;
+  C.x = A.x - B.x;
+  C.y = A.y- B.y;
+  return C;
+}
+
 nav::nav() : Kp(2.0), Kd(1.0), DELTA_T(0.1) {
   Serial.println("Initialising sailboat...");
   powerboard = new controlMotor();
@@ -240,4 +251,38 @@ int getMaxLogIndex() {
     }
   }
   return maxIndex;
+}
+
+void nav::path_following(GPScoord list_points[]){
+  int nb_points = (sizeof list_points) / (sizeof list_points[0]);
+  for(int i = 0; i < nb_points - 1; i++){
+    GPScoord starting_point = list_points[i];
+    GPScoord ending_point = list_points[i+1];
+    GPScoord gps_pos = gps->getPoint();
+    Cartcoord start_cart = gps->conversion(starting_point);
+    Cartcoord end_cart = gps->conversion(ending_point);
+    Cartcoord pos_cart = gps->conversion(gps_pos);
+    Cartcoord end2start = diff(start_cart, end_cart);
+    Cartcoord end2pos =  diff(pos_cart, end_cart);
+    while(scalprod(end2start, end2pos) > 0){ // While the boat has not overpassed the end of the line...
+      linefollowing(starting_point.lat, starting_point.lng, ending_point.lat, ending_point.lng);
+      gps_pos = gps->getPoint(); // Updates the 'while' loop's condition
+      pos_cart = gps->conversion(gps_pos);
+      end2pos = diff(pos_cart, end_cart);
+    }
+    //Note : this architecture should allow for the boat to be brought from one point to another using the controler, and then resuming it's mission
+    // in autonoous mode properly.
+  }
+  while(true){}; //Make sure the program won't start over. Might be removed later if we need the program to do something else once it has completed
+  //this part of the mission...
+  return;
+}
+
+void nav::basic_place_holder(int time_millis){
+  int t0 = millis();
+  while(millis - t0 < time_millis){
+    powerboard->set_angle_rudder(50); // Set rudder to full left
+    powerboard->set_angle_sail(SERVOMAX_SAIL); // Set the sail free/loose
+  }
+  return;
 }
