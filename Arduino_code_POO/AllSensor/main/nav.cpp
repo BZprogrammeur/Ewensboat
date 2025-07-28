@@ -187,7 +187,7 @@ void nav::linefollowing(float lata, float longa, float latb, float longb){
     }
     // TODO : Clarify the part above about q value.
     float angle_target=sawtooth(atan2(ab.y,ab.x) - (PI/2));
-    float angle_nominal=angle_target-2*gamma*atan(e/r)/PI;
+    float angle_nominal= -sawtooth(angle_target-2*gamma*atan(e/r)/PI);
 
     float aimed_angle;
     if(cos(angle_truewind-angle_nominal)+cos(phi) < 0 || (abs(e) < r && cos(angle_truewind-angle_target)+cos(phi) < 0)){

@@ -219,7 +219,7 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
         print(f'q = {q}')
         angle_line = sawtooth(np.arctan2(AB[0][0], AB[1][0]) - np.pi/2)
         print(f'Angle line = {angle_line * 180 / np.pi}')
-        angle_nom = sawtooth(angle_line - 2 * gamma * np.arctan(e/r) / np.pi)
+        angle_nom = -sawtooth(angle_line - 2 * gamma * np.arctan(e/r) / np.pi)
         print(f'Angle nominal = {angle_nom * 180 / np.pi}')
         if (np.cos(true_wind_angle - angle_nom) + np.cos(phi) < 0) or (abs(e) < r and np.cos(true_wind_angle - angle_line) + np.cos(phi) < 0):
             aimed_angle = sawtooth(np.pi + true_wind_angle - q * phi)
