@@ -4,7 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 %matplotlib qt
 import simplekml
+import time
 
+def sawtooth(x : float) -> float:
+  return 2*np.arctan(np.tan(x/2));
 
 def read_log(log_number : int) -> np.ndarray:
     logfilename = 'Log_files/NAVLOG' + str(log_number) + '.TXT'
@@ -16,7 +19,7 @@ def read_log(log_number : int) -> np.ndarray:
         logs.append([float(val) for val in values])
         line = logfile.readline()
     logs = np.array(logs).T
-    print(logs)
+    # print(logs)
     return logs
     
 def get_latest_log_number() -> int:
@@ -62,10 +65,10 @@ def map2(x : float, in_min : float, in_max : float, out_min : float, out_max : f
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 
 def conv_rud_com_to_pos(com: np.ndarray) -> np.ndarray:
-    return np.clip(map2(com, 180, 430, -85, 85), -85, 85)
+    return np.clip(map2(com, 410, 200, -50, 50), -50, 50)
 
 def conv_sail_com_to_pos(com: np.ndarray) -> np.ndarray:
-    return np.clip(map2(com, 180, 280, 0, 90), 0, 90)
+    return np.clip(map2(com, 225, 350, 0, 90), 0, 90)
     
 def generate_animation(logs : np.ndarray, ref_point : np.ndarray, start_point : np.ndarray, end_point : np.ndarray) -> None:
     ref_point *= np.pi/180
@@ -73,9 +76,10 @@ def generate_animation(logs : np.ndarray, ref_point : np.ndarray, start_point : 
     end_point *= np.pi/180
     lat = logs[1] * np.pi / 180
     long = logs[2] * np.pi / 180
-    head = logs[3] * np.pi / 180
-    rud_angles = conv_rud_com_to_pos(logs[4]) * np.pi / 180
-    sail_angles = conv_sail_com_to_pos(logs[5]) * np.pi / 180
+    head = logs[3] * np.pi / 180 + np.pi / 2
+    SOG = logs[4]
+    rud_angles = conv_rud_com_to_pos(logs[7]) * np.pi / 180
+    sail_angles = conv_sail_com_to_pos(logs[8]) * np.pi / 180
     R = 6371e3
     xa = R * (start_point[1] - ref_point[1]) * np.cos(ref_point[0])
     print(f'xa = {xa}')
@@ -96,7 +100,7 @@ def generate_animation(logs : np.ndarray, ref_point : np.ndarray, start_point : 
     ax.ymin=-100
     ax.ymax=100
     size_factor = 3
-    dir_wind = (logs[5] - logs[3]) * np.pi / 180
+    dir_wind = (logs[5] + logs[3]) * np.pi / 180
     boat_shape = size_factor * np.array([[-0.25, 0, 0.25, 0.25, -0.25, -0.25],
                            [0., 1, 0., -2., -2., 0.]])
     sail_shape = size_factor * np.array([[0., 0.],
@@ -106,8 +110,8 @@ def generate_animation(logs : np.ndarray, ref_point : np.ndarray, start_point : 
     arrow_pos = (0.85, 0.85)
     for i in range(len(logs[0])):
         ax.clear()
-        ax.set_xlim(ax.xmin,ax.xmax)
-        ax.set_ylim(ax.ymin,ax.ymax)
+        # ax.set_xlim(ax.xmin,ax.xmax)
+        # ax.set_ylim(ax.ymin,ax.ymax)
         # print(f'i = {i}')
         R_boat = np.array([[np.cos(head[i]), -np.sin(head[i])],
                            [np.sin(head[i]), np.cos(head[i])]]) 
@@ -115,18 +119,13 @@ def generate_animation(logs : np.ndarray, ref_point : np.ndarray, start_point : 
                           [np.sin(rud_angles[i]), np.cos(rud_angles[i])]])
         R_sail = np.array([[np.cos(sail_angles[i]), -np.sin(sail_angles[i])],
                            [np.sin(sail_angles[i]), np.cos(sail_angles[i])]])
-        R_wind = np.array([[np.cos(dir_wind[i]), - np.sin(dir_wind[i])],
-                           [np.sin(dir_wind[i]), np.cos(dir_wind[i])]])
-        arrow_tip = R_wind @ np.array([[0.], [0.1]])
+        arrow_tip = np.array([[SOG[i] * np.sin(head[i]) - logs[6][i] * np.sin(dir_wind[i])], 
+                              [SOG[i] * np.cos(head[i]) - logs[6][i] * np.cos(dir_wind[i])]])
         arrow_tip_pos = (arrow_pos[0] + arrow_tip[0, 0], arrow_pos[1] + arrow_tip[1, 0])
         # print((R_boat @ boat_shape)[0] + x[i])
         ax.plot((R_boat @ boat_shape)[0] + x[i], (R_boat @ boat_shape)[1] + y[i])
         ax.plot((R_sail @ R_boat @ sail_shape)[0] + x[i], (R_sail @ R_boat @ sail_shape)[1] + y[i])
-        ax.plot((R_rud @ R_boat @ rud_shape)[0] + x[i], (R_rud @ R_boat @ rud_shape)[1] + y[i] - 2 * size_factor)
-        print(f'xa = {xa}')
-        print(f'ya = {ya}')
-        print(f'xb = {xb}')
-        print(f'yb = {yb}')
+        ax.plot((R_boat @ (R_rud @ rud_shape - size_factor * np.array([[0], [2]])))[0] + x[i], (R_boat @ (R_rud @ rud_shape - size_factor * np.array([[0], [2]])))[1] + y[i])
         ax.plot([xa, xb], [ya, yb])
         ax.plot(x[:i+1], y[:i+1], 'b')
         ax.annotate(
@@ -135,7 +134,7 @@ def generate_animation(logs : np.ndarray, ref_point : np.ndarray, start_point : 
             xytext=arrow_pos, textcoords='axes fraction',
             arrowprops=dict(facecolor='red', shrink=0.05)
             )
-        ax.text(0.7, 0.8, f'Apparent wind speed : {logs[5][i]}',
+        ax.text(0.7, 0.8, f'Apparent wind speed : {logs[6][i]}',
                 transform=ax.transAxes,
                 fontsize=8)
         try:
@@ -144,10 +143,118 @@ def generate_animation(logs : np.ndarray, ref_point : np.ndarray, start_point : 
             pass
     return
 
+def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : np.ndarray, end_point : np.ndarray) -> None:
+    ref_point *= np.pi/180
+    start_point *= np.pi/180
+    end_point *= np.pi/180
+    lat = logs[1] * np.pi / 180
+    long = logs[2] * np.pi / 180
+    head = logs[3] * np.pi / 180
+    SOG = logs[4]
+    rud_angles = conv_rud_com_to_pos(logs[4]) * np.pi / 180
+    sail_angles = conv_sail_com_to_pos(logs[5]) * np.pi / 180
+    R = 6371e3
+    xa = R * (start_point[1] - ref_point[1]) * np.cos(ref_point[0])
+    ya = R * (start_point[0] - ref_point[0])
+    A = np.array([[xa], [ya]])
+    print(f'A = {A}')
+    xb = R * (end_point[1] - ref_point[1]) * np.cos(ref_point[0])
+    yb = R * (end_point[0] - ref_point[0])
+    B = np.array([[xb], [yb]])
+    print(f'B = {B}')
+    AB = B - A
+    C = AB / np.linalg.norm(AB)
+    x = R * (long - ref_point[1]) * np.cos(ref_point[0])
+    y = R * (lat - ref_point[0])
+    dir_wind = (logs[5] - logs[3]) * np.pi / 180
+    
+    r = 6
+    q = 1
+    gamma = np.pi/4
+    phi = np.pi/3
+    angle_ruddermax = 50
+    
+    fig, ax = plt.subplots()
+    ax.xmin=-100
+    ax.xmax=100
+    ax.ymin=-100
+    ax.ymax=100
+    size_factor = 3
+    boat_shape = size_factor * np.array([[-0.25, 0, 0.25, 0.25, -0.25, -0.25],
+                           [0., 1, 0., -2., -2., 0.]])
+    sail_shape = size_factor * np.array([[0., 0.],
+                           [0., -0.9]])
+    rud_shape = size_factor * np.array([[0., 0.],
+                          [-0., -0.3]])
+    rud_angles = conv_rud_com_to_pos(logs[7]) * np.pi / 180
+    sail_angles = conv_sail_com_to_pos(logs[8]) * np.pi / 180
+    arrow_pos = (0.85, 0.85)
+    
+    for i in range(len(logs[0])):
+        
+        ax.clear()
+        # ax.set_xlim(ax.xmin,ax.xmax)
+        # ax.set_ylim(ax.ymin,ax.ymax)
+        # print(f'i = {i}')
+        R_boat = np.array([[np.cos(head[i]), -np.sin(head[i])],
+                           [np.sin(head[i]), np.cos(head[i])]]) 
+        R_rud = np.array([[np.cos(rud_angles[i]), -np.sin(rud_angles[i])],
+                          [np.sin(rud_angles[i]), np.cos(rud_angles[i])]])
+        R_sail = np.array([[np.cos(sail_angles[i]), -np.sin(sail_angles[i])],
+                           [np.sin(sail_angles[i]), np.cos(sail_angles[i])]])
+        
+        
+        M = np.array([[x[i]], [y[i]]])
+        print(f'M = {M}')
+        print(f'Heading = {head[i] * 180 / np.pi}')
+        D = M - A
+        e = C[0][0] * D[1][0] - D[0][0] * C[1][0]
+        true_wind = np.array([[SOG[i] * np.sin(head[i]) - logs[6][i] * np.sin(dir_wind[i])], 
+                              [SOG[i] * np.cos(head[i]) - logs[6][i] * np.cos(dir_wind[i])]])
+        true_wind_angle = sawtooth(np.arctan2(true_wind[0][0], true_wind[1][0]) - (np.pi / 2))
+        print(f'true wind : {true_wind}')
+        print(f'true wind angle : {true_wind_angle * 180 / np.pi}')
+        if abs(e) > r/2:
+            q = np.sign(e)
+        print(f'q = {q}')
+        angle_line = sawtooth(np.arctan2(AB[0][0], AB[1][0]) - np.pi/2)
+        print(f'Angle line = {angle_line * 180 / np.pi}')
+        angle_nom = sawtooth(angle_line - 2 * gamma * np.arctan(e/r) / np.pi)
+        print(f'Angle nominal = {angle_nom * 180 / np.pi}')
+        if (np.cos(true_wind_angle - angle_nom) + np.cos(phi) < 0) or (abs(e) < r and np.cos(true_wind_angle - angle_line) + np.cos(phi) < 0):
+            aimed_angle = sawtooth(np.pi + true_wind_angle - q * phi)
+            print("TACKING ACTIVE")
+        else:
+            aimed_angle = angle_nom
+        print(f'Aimed angle : {aimed_angle * 180 / np.pi}')
+        angle_rudder =  min(max(-angle_ruddermax, angle_ruddermax*np.sin(head[i]-aimed_angle)), angle_ruddermax)
+        print(f'Angle rudder : {angle_rudder}')
+        
+        arrow_tip_pos = (arrow_pos[0] + true_wind[0, 0], arrow_pos[1] + true_wind[1, 0])
+        ax.plot((R_boat @ boat_shape)[0] + x[i], (R_boat @ boat_shape)[1] + y[i])
+        ax.plot((R_sail @ R_boat @ sail_shape)[0] + x[i], (R_sail @ R_boat @ sail_shape)[1] + y[i])
+        ax.plot((R_boat @ (R_rud @ rud_shape - size_factor * np.array([[0], [2]])))[0] + x[i], (R_boat @ (R_rud @ rud_shape - size_factor * np.array([[0], [2]])))[1] + y[i])
+        ax.plot([xa, xb], [ya, yb])
+        ax.plot(x[:i+1], y[:i+1], 'b')
+        ax.annotate(
+            '', 
+            xy=arrow_tip_pos, xycoords='axes fraction',
+            xytext=arrow_pos, textcoords='axes fraction',
+            arrowprops=dict(facecolor='red', shrink=0.05)
+            )
+        ax.text(0.7, 0.8, f'Apparent wind speed : {logs[6][i]}',
+                transform=ax.transAxes,
+                fontsize=8)
+
+
+        plt.pause(0.5)
+    
+
 if __name__ == '__main__' :
-    ref_point = np.array([52.4863774, -1.8894429])
-    start_point = np.array([52.4863774, -1.8894429])
-    end_point = np.array([52.486813, -1.888868])
-    # generate_animation(read_log(get_latest_log_number()), ref_point, start_point, end_point)
-    toKML(24)
+    ref_point = np.array([52.4844041, -1.8898449])
+    start_point = np.array([52.4844663, -1.8895039])
+    end_point = np.array([52.4843069, -1.8905943])
+    # generate_animation(read_log(32), ref_point, start_point, end_point)
+    simulate_computing(read_log(32), ref_point, start_point, end_point)
+    # toKML(24)
     

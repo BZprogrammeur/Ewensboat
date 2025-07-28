@@ -13,5 +13,13 @@ void setup() {
 
 void loop() {
   // navigator->update();
-  navigator->linefollowing(52.4844663, -1.8895039, 52.4843069, -1.8905943);
+  // navigator->linefollowing(52.4844663, -1.8895039, 52.4843069, -1.8905943);
+  GPScoord Point1 = {52.4844663, -1.8895039};
+  GPScoord Point2 = {52.4843069, -1.8905943};
+  GPScoord Point3 = {52.4845141, -1.8905922};
+  GPScoord Point4 = {52.4847932, -1.8899488};
+  GPScoord Point5 = {52.4846881, -1.8896900};
+  GPScoord listpoints[] = {Point1, Point2, Point3, Point4, Point5, Point1};
+  navigator->path_following(listpoints, 6);
+
 }

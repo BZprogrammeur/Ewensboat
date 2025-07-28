@@ -34,7 +34,7 @@ float GPS::getSOG(){
 }
 
 GPScoord GPS::getPoint() const {
-  return GPScoord{getLatitude(), getLongitude()};
+  return GPScoord{latitude, longitude};
 }
 
 bool GPS::isValid() const {

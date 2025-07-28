@@ -42,7 +42,7 @@ void WindSensor::countPulse() {
 }
 
 void WindSensor::update_speed() {
-        float windSpeed = pulseCount * 0.44704;  // Facteur de conversion (à ajuster selon le capteur)
+        windSpeed = pulseCount * 0.44704;  // Facteur de conversion (à ajuster selon le capteur)
         // Serial.print("Wind speed: ");
         // Serial.print(windSpeed);
         // Serial.println(" m/s");

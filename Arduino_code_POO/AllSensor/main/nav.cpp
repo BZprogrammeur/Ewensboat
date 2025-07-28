@@ -71,7 +71,7 @@ void nav::update_logs(){
   logfile.print(' ');
   logfile.print(gps->getSOG());
   logfile.print(' ');
-  logfile.print(get_true_wind_dir());
+  logfile.print(wind->get_wind_direction());
   logfile.print(' ');
   logfile.print(wind->get_wind_speed());
   logfile.print(' ');
@@ -145,13 +145,12 @@ void nav::set_sail_pos(){
 void nav::linefollowing(float lata, float longa, float latb, float longb){
   update();
   if(controler->checkUnmanned()){
-    update();
     // from the Matlab simulation coded by Pr. Jian Wan
     // % a --- the starting point;
     // % b --- the ending point;
     float heading = sawtooth(imu->get_heading() * PI / 180);
     // % r --- the cutoff distance;
-    float r = 3.; //Short distance such as 3 meters will hopefully allow the boat to navigate in a narrow canal.
+    float r = 6.; //Short distance such as 3 meters will hopefully allow the boat to navigate in a narrow canal.
     // % q --- the tacking variable;
     float q = 1;
     // % gamma --- the incidence angle;
@@ -184,7 +183,7 @@ void nav::linefollowing(float lata, float longa, float latb, float longb){
     d.y = m.y - a.y;
     float e = c.x * d.y - d.x * c.y;
     if(abs(e) > r/2){
-        q = -1;
+        q = e / abs(e);
     }
     // TODO : Clarify the part above about q value.
     float angle_target=sawtooth(atan2(ab.y,ab.x) - (PI/2));
@@ -220,12 +219,12 @@ float nav::get_true_wind_dir(){
   // Serial.print("SOG: ");
   // Serial.println(SOG);
   float COG = imu->get_heading() * PI / 180; // technically false but good enough approximation as the GPS is very unprecise and the boat doesn't drift much.
-  float AWS = wind->get_wind_speed();
-  float AWD = wind->get_wind_direction() * PI / 180;
+  float AWS = wind->get_wind_speed() ;
+  float AWD = sawtooth((wind->get_wind_direction() + imu->get_heading()) * PI / 180);
 
   float u = SOG * sin(COG) - AWS * sin(AWD);
   float v = SOG * cos(COG) - AWS * cos(AWD);
-  return sawtooth(atan2(u, v));
+  return atan2(u, v) - (PI / 2);
 }
 
 int getMaxLogIndex() {
@@ -253,8 +252,7 @@ int getMaxLogIndex() {
   return maxIndex;
 }
 
-void nav::path_following(GPScoord list_points[]){
-  int nb_points = (sizeof list_points) / (sizeof list_points[0]);
+void nav::path_following(GPScoord list_points[], int nb_points){
   for(int i = 0; i < nb_points - 1; i++){
     GPScoord starting_point = list_points[i];
     GPScoord ending_point = list_points[i+1];
@@ -272,6 +270,10 @@ void nav::path_following(GPScoord list_points[]){
     }
     //Note : this architecture should allow for the boat to be brought from one point to another using the controler, and then resuming it's mission
     // in autonoous mode properly.
+  }
+  for(int i = 0; i<3; i++){
+  init_sequence_rud();
+  delay(1000);
   }
   while(true){}; //Make sure the program won't start over. Might be removed later if we need the program to do something else once it has completed
   //this part of the mission...

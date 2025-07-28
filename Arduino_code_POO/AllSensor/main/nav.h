@@ -25,7 +25,7 @@ public:
   void linefollowing(float lata, float longa, float latb, float longb);
   void update_logs();
   void update();
-  void path_following(GPScoord list_points[]);
+  void path_following(GPScoord list_points[], int nb_points);
   void basic_place_holder(int time_millis);
 private:
     const float Kp = 2.0;     // Gain proportionnel (à ajuster)
