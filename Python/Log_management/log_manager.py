@@ -62,10 +62,10 @@ def toKML(log_number : int):
     kml.save(kmlfilename)
 
 def map2(x : float, in_min : float, in_max : float, out_min : float, out_max : float) -> float:
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
 def conv_rud_com_to_pos(com: np.ndarray) -> np.ndarray:
-    return np.clip(map2(com, 410, 200, -50, 50), -50, 50)
+    return np.clip(map2(com, 200, 410, 50, -50), -50, 50)
 
 def conv_sail_com_to_pos(com: np.ndarray) -> np.ndarray:
     return np.clip(map2(com, 225, 350, 0, 90), 0, 90)
@@ -198,13 +198,14 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
         # print(f'i = {i}')
         R_boat = np.array([[np.cos(head[i]), -np.sin(head[i])],
                            [np.sin(head[i]), np.cos(head[i])]]) 
-        R_rud = np.array([[np.cos(rud_angles[i]), -np.sin(rud_angles[i])],
+        R_rud_re = np.array([[np.cos(rud_angles[i]), -np.sin(rud_angles[i])],
                           [np.sin(rud_angles[i]), np.cos(rud_angles[i])]])
         R_sail = np.array([[np.cos(sail_angles[i]), -np.sin(sail_angles[i])],
                            [np.sin(sail_angles[i]), np.cos(sail_angles[i])]])
         
         
         M = np.array([[x[i]], [y[i]]])
+        print(f'Test time : {logs[0][i]}')
         print(f'M = {M}')
         print(f'Heading = {head[i] * 180 / np.pi}')
         D = M - A
@@ -228,12 +229,17 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
             aimed_angle = angle_nom
         print(f'Aimed angle : {aimed_angle * 180 / np.pi}')
         angle_rudder =  min(max(-angle_ruddermax, angle_ruddermax*np.sin(head[i]-aimed_angle)), angle_ruddermax)
-        print(f'Angle rudder : {angle_rudder}')
+        print(f'Angle rudder simulated: {angle_rudder}')
+        print(f'Angle rudder real: {rud_angles[i] * 180 / np.pi}')
+        
+        R_rud_th = np.array([[np.cos(angle_rudder * np.pi / 180), -np.sin(angle_rudder * np.pi / 180)],
+                          [np.sin(angle_rudder * np.pi / 180), np.cos(angle_rudder * np.pi / 180)]])
         
         arrow_tip_pos = (arrow_pos[0] + true_wind[0, 0], arrow_pos[1] + true_wind[1, 0])
-        ax.plot((R_boat @ boat_shape)[0] + x[i], (R_boat @ boat_shape)[1] + y[i])
+        ax.plot((R_boat @ boat_shape)[0] + x[i], (R_boat @ boat_shape)[1] + y[i], color = ('black' if logs[-1][i] == 0 else 'blue'))
         ax.plot((R_sail @ R_boat @ sail_shape)[0] + x[i], (R_sail @ R_boat @ sail_shape)[1] + y[i])
-        ax.plot((R_boat @ (R_rud @ rud_shape - size_factor * np.array([[0], [2]])))[0] + x[i], (R_boat @ (R_rud @ rud_shape - size_factor * np.array([[0], [2]])))[1] + y[i])
+        ax.plot((R_boat @ (R_rud_re @ rud_shape - size_factor * np.array([[0], [2]])))[0] + x[i], (R_boat @ (R_rud_re @ rud_shape - size_factor * np.array([[0], [2]])))[1] + y[i], color = 'green')
+        ax.plot((R_boat @ (R_rud_th @ rud_shape - size_factor * np.array([[0], [2]])))[0] + x[i], (R_boat @ (R_rud_th @ rud_shape - size_factor * np.array([[0], [2]])))[1] + y[i], color = 'red')
         ax.plot([xa, xb], [ya, yb])
         ax.plot(x[:i+1], y[:i+1], 'b')
         ax.annotate(
@@ -245,16 +251,16 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
         ax.text(0.7, 0.8, f'Apparent wind speed : {logs[6][i]}',
                 transform=ax.transAxes,
                 fontsize=8)
-
-
-        plt.pause(0.5)
-    
+        try:
+            plt.pause((logs[0][i+1] - logs[0][i])/1000)
+        except IndexError:
+            pass
 
 if __name__ == '__main__' :
     ref_point = np.array([52.4844041, -1.8898449])
     start_point = np.array([52.4844663, -1.8895039])
     end_point = np.array([52.4843069, -1.8905943])
+    toKML(get_latest_log_number())
     # generate_animation(read_log(32), ref_point, start_point, end_point)
-    simulate_computing(read_log(32), ref_point, start_point, end_point)
-    # toKML(24)
+    simulate_computing(read_log(get_latest_log_number()), ref_point, start_point, end_point)
     
