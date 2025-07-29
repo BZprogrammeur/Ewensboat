@@ -263,4 +263,3 @@ if __name__ == '__main__' :
     toKML(get_latest_log_number())
     # generate_animation(read_log(32), ref_point, start_point, end_point)
     simulate_computing(read_log(get_latest_log_number()), ref_point, start_point, end_point)
-    

@@ -191,7 +191,7 @@ void nav::linefollowing(float lata, float longa, float latb, float longb){
 
     float aimed_angle;
     if(cos(angle_truewind-angle_nominal)+cos(phi) < 0 || (abs(e) < r && cos(angle_truewind-angle_target)+cos(phi) < 0)){
-      aimed_angle=PI + angle_truewind - q * phi;
+      aimed_angle= sawtooth(PI + angle_truewind - q * phi);
     }
     else{
       aimed_angle=angle_nominal;
@@ -271,11 +271,11 @@ void nav::path_following(GPScoord list_points[], int nb_points){
     //Note : this architecture should allow for the boat to be brought from one point to another using the controler, and then resuming it's mission
     // in autonoous mode properly.
   }
-  for(int i = 0; i<3; i++){
+  // for(int i = 0; i<3; i++){
   init_sequence_rud();
-  delay(1000);
-  }
-  while(true){}; //Make sure the program won't start over. Might be removed later if we need the program to do something else once it has completed
+  // delay(1000);
+  // }
+  // while(true){}; //Make sure the program won't start over. Might be removed later if we need the program to do something else once it has completed
   //this part of the mission...
   return;
 }
