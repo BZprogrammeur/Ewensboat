@@ -199,7 +199,7 @@ void nav::linefollowing(float lata, float longa, float latb, float longb){
     // Serial.print("Target angle:");
     // Serial.println(aimed_angle);
     float angle_rudder;
-    angle_rudder = min(max(-angle_ruddermax, angle_ruddermax*sin(heading-aimed_angle)), angle_ruddermax);
+    angle_rudder = min(max(-angle_ruddermax, angle_ruddermax*sin(sawtooth(heading-aimed_angle)/2)), angle_ruddermax);
     // Serial.print("Angle rudder:");
     // Serial.println(angle_rudder);
     powerboard->set_angle_rudder(angle_rudder);
@@ -224,7 +224,7 @@ float nav::get_true_wind_dir(){
 
   float u = SOG * sin(COG) - AWS * sin(AWD);
   float v = SOG * cos(COG) - AWS * cos(AWD);
-  return atan2(u, v) - (PI / 2);
+  return sawtooth(atan2(v, u) - (PI / 2));
 }
 
 int getMaxLogIndex() {

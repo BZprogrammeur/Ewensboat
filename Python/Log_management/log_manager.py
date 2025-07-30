@@ -213,9 +213,10 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
         D = M - A
         e = C[0][0] * D[1][0] - D[0][0] * C[1][0]
         print(f'e = {e}')
+        print(f'SOG = {SOG[i]}')
         true_wind = np.array([[SOG[i] * np.sin(head[i]) - logs[6][i] * np.sin(dir_wind[i])], 
                               [SOG[i] * np.cos(head[i]) - logs[6][i] * np.cos(dir_wind[i])]])
-        true_wind_angle = sawtooth(np.arctan2(true_wind[0][0], true_wind[1][0]) - (np.pi / 2))
+        true_wind_angle = sawtooth(np.arctan2(true_wind[1][0], true_wind[0][0]) - (np.pi / 2))
         print(f'true wind : {true_wind}')
         print(f'true wind angle : {true_wind_angle * 180 / np.pi}')
         if abs(e) > r/2:
@@ -238,7 +239,7 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
         print(f'Aimed angle : {aimed_angle * 180 / np.pi}')
         R_aimed = np.array([[np.cos(aimed_angle), -np.sin(aimed_angle)],
                           [np.sin(aimed_angle), np.cos(aimed_angle)]])
-        angle_rudder =  min(max(-angle_ruddermax, angle_ruddermax*np.sin(head[i]-aimed_angle)), angle_ruddermax)
+        angle_rudder =  min(max(-angle_ruddermax, angle_ruddermax*np.sin(sawtooth(head[i]-aimed_angle)/2)), angle_ruddermax)
         print(f'Angle rudder simulated: {angle_rudder}')
         print(f'Angle rudder real: {rud_angles[i] * 180 / np.pi}')
         
