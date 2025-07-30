@@ -76,7 +76,7 @@ def generate_animation(logs : np.ndarray, ref_point : np.ndarray, start_point : 
     end_point *= np.pi/180
     lat = logs[1] * np.pi / 180
     long = logs[2] * np.pi / 180
-    head = logs[3] * np.pi / 180 + np.pi / 2
+    head = - logs[3] * np.pi / 180 + np.pi / 2
     SOG = logs[4]
     rud_angles = conv_rud_com_to_pos(logs[7]) * np.pi / 180
     sail_angles = conv_sail_com_to_pos(logs[8]) * np.pi / 180
@@ -149,7 +149,7 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
     end_point *= np.pi/180
     lat = logs[1] * np.pi / 180
     long = logs[2] * np.pi / 180
-    head = logs[3] * np.pi / 180
+    head = - logs[3] * np.pi / 180
     SOG = logs[4]
     rud_angles = conv_rud_com_to_pos(logs[4]) * np.pi / 180
     sail_angles = conv_sail_com_to_pos(logs[5]) * np.pi / 180
@@ -166,7 +166,7 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
     C = AB / np.linalg.norm(AB)
     x = R * (long - ref_point[1]) * np.cos(ref_point[0])
     y = R * (lat - ref_point[0])
-    dir_wind = (logs[5] - logs[3]) * np.pi / 180
+    dir_wind = (-logs[5] - logs[3]) * np.pi / 180
     
     r = 6
     q = 1
@@ -186,6 +186,8 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
                            [0., -0.9]])
     rud_shape = size_factor * np.array([[0., 0.],
                           [-0., -0.3]])
+    arrow_shape = np.array([[0, 0, -0.25, 0, 0.25], 
+                           [0, 2, 1.75, 2, 1.75]])
     rud_angles = conv_rud_com_to_pos(logs[7]) * np.pi / 180
     sail_angles = conv_sail_com_to_pos(logs[8]) * np.pi / 180
     arrow_pos = (0.85, 0.85)
@@ -210,6 +212,7 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
         print(f'Heading = {head[i] * 180 / np.pi}')
         D = M - A
         e = C[0][0] * D[1][0] - D[0][0] * C[1][0]
+        print(f'e = {e}')
         true_wind = np.array([[SOG[i] * np.sin(head[i]) - logs[6][i] * np.sin(dir_wind[i])], 
                               [SOG[i] * np.cos(head[i]) - logs[6][i] * np.cos(dir_wind[i])]])
         true_wind_angle = sawtooth(np.arctan2(true_wind[0][0], true_wind[1][0]) - (np.pi / 2))
@@ -218,9 +221,14 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
         if abs(e) > r/2:
             q = np.sign(e)
         print(f'q = {q}')
-        angle_line = sawtooth(np.arctan2(AB[0][0], AB[1][0]) - np.pi/2)
+        angle_line = sawtooth(np.arctan2(AB[1][0], AB[0][0]) - np.pi/2)
         print(f'Angle line = {angle_line * 180 / np.pi}')
-        angle_nom = -sawtooth(angle_line - 2 * gamma * np.arctan(e/r) / np.pi)
+        
+        R_line  = np.array([[np.cos(angle_line), -np.sin(angle_line)],
+                           [np.sin(angle_line), np.cos(angle_line)]])
+        angle_nom = sawtooth(angle_line - 2 * gamma * np.arctan(e/r) / np.pi)
+        R_nom = np.array([[np.cos(angle_nom), -np.sin(angle_nom)],
+                          [np.sin(angle_nom), np.cos(angle_nom)]])
         print(f'Angle nominal = {angle_nom * 180 / np.pi}')
         if (np.cos(true_wind_angle - angle_nom) + np.cos(phi) < 0) or (abs(e) < r and np.cos(true_wind_angle - angle_line) + np.cos(phi) < 0):
             aimed_angle = sawtooth(np.pi + true_wind_angle - q * phi)
@@ -228,6 +236,8 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
         else:
             aimed_angle = angle_nom
         print(f'Aimed angle : {aimed_angle * 180 / np.pi}')
+        R_aimed = np.array([[np.cos(aimed_angle), -np.sin(aimed_angle)],
+                          [np.sin(aimed_angle), np.cos(aimed_angle)]])
         angle_rudder =  min(max(-angle_ruddermax, angle_ruddermax*np.sin(head[i]-aimed_angle)), angle_ruddermax)
         print(f'Angle rudder simulated: {angle_rudder}')
         print(f'Angle rudder real: {rud_angles[i] * 180 / np.pi}')
@@ -242,6 +252,9 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
         ax.plot((R_boat @ (R_rud_th @ rud_shape - size_factor * np.array([[0], [2]])))[0] + x[i], (R_boat @ (R_rud_th @ rud_shape - size_factor * np.array([[0], [2]])))[1] + y[i], color = 'red')
         ax.plot([xa, xb], [ya, yb])
         ax.plot(x[:i+1], y[:i+1], 'b')
+        ax.plot((R_line @ arrow_shape + A)[0], (R_line @ arrow_shape + A)[1])
+        ax.plot((R_nom @ arrow_shape)[0] + x[i], (R_nom @ arrow_shape)[1] + y[i], color = 'red')
+        ax.plot((R_aimed @ arrow_shape)[0] + x[i], (R_aimed @ arrow_shape)[1] + y[i], color = 'green')
         ax.annotate(
             '', 
             xy=arrow_tip_pos, xycoords='axes fraction',
@@ -258,8 +271,8 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
 
 if __name__ == '__main__' :
     ref_point = np.array([52.4844041, -1.8898449])
-    start_point = np.array([52.4844663, -1.8895039])
-    end_point = np.array([52.4843069, -1.8905943])
-    toKML(get_latest_log_number())
+    start_point = np.array([52.485958, -1.889726])
+    end_point = np.array([52.4860084, -1.8889055])
+    toKML(38)
     # generate_animation(read_log(32), ref_point, start_point, end_point)
-    simulate_computing(read_log(get_latest_log_number()), ref_point, start_point, end_point)
+    simulate_computing(read_log(38), ref_point, start_point, end_point)

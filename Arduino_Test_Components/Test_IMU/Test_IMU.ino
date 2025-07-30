@@ -12,6 +12,10 @@
 // char pitch, roll;
 // int16_t angle16;
 
+float sawtooth(float x){
+  return 2*atan(tan(x/2));
+}
+
 void setup()
 {
   Serial.begin(9600);  // Start serial port
@@ -56,7 +60,7 @@ void loop(){
         unsigned int angle16 = high_byte;           // Calculate 16 bit angle
         angle16 <<= 8;
         angle16 += low_byte;
-        float m_raw_yaw = angle16/10 + (float)(angle16%10)/10;
+        float m_raw_yaw = - sawtooth((angle16 / 10 + (float)(angle16%10)/10 + 180) * PI / 180) * 180 / PI;
         Serial.print("Angle:");
         Serial.println(m_raw_yaw);
     }
