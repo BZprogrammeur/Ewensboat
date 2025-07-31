@@ -100,7 +100,7 @@ def generate_animation(logs : np.ndarray, ref_point : np.ndarray, start_point : 
     ax.ymin=-100
     ax.ymax=100
     size_factor = 3
-    dir_wind = (logs[5] + logs[3]) * np.pi / 180
+    dir_wind = sawtooth((logs[5] + logs[3]) * np.pi / 180)
     boat_shape = size_factor * np.array([[-0.25, 0, 0.25, 0.25, -0.25, -0.25],
                            [0., 1, 0., -2., -2., 0.]])
     sail_shape = size_factor * np.array([[0., 0.],
@@ -149,7 +149,7 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
     end_point *= np.pi/180
     lat = logs[1] * np.pi / 180
     long = logs[2] * np.pi / 180
-    head = - logs[3] * np.pi / 180
+    head = logs[3] * np.pi / 180
     SOG = logs[4]
     rud_angles = conv_rud_com_to_pos(logs[4]) * np.pi / 180
     sail_angles = conv_sail_com_to_pos(logs[5]) * np.pi / 180
@@ -166,7 +166,7 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
     C = AB / np.linalg.norm(AB)
     x = R * (long - ref_point[1]) * np.cos(ref_point[0])
     y = R * (lat - ref_point[0])
-    dir_wind = (-logs[5] - logs[3]) * np.pi / 180
+    dir_wind = (logs[5] + logs[3]) * np.pi / 180
     
     r = 6
     q = 1
@@ -274,6 +274,6 @@ if __name__ == '__main__' :
     ref_point = np.array([52.4844041, -1.8898449])
     start_point = np.array([52.485958, -1.889726])
     end_point = np.array([52.4860084, -1.8889055])
-    toKML(38)
+    toKML(42)
     # generate_animation(read_log(32), ref_point, start_point, end_point)
-    simulate_computing(read_log(38), ref_point, start_point, end_point)
+    simulate_computing(read_log(42), ref_point, start_point, end_point)

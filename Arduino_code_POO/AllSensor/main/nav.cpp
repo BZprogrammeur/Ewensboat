@@ -190,7 +190,7 @@ void nav::linefollowing(float lata, float longa, float latb, float longb){
     float angle_nominal = sawtooth(angle_target-2*gamma*atan(e/r)/PI);
 
     float aimed_angle;
-    if(cos(angle_truewind-angle_nominal)+cos(phi) < 0 || (abs(e) < r && cos(angle_truewind-angle_target)+cos(phi) < 0)){
+    if((cos(angle_truewind-angle_nominal)+cos(phi) < 0) || ((abs(e) < r) && ((cos(angle_truewind-angle_target)+cos(phi)) < 0))){
       aimed_angle= sawtooth(PI + angle_truewind - q * phi);
     }
     else{
