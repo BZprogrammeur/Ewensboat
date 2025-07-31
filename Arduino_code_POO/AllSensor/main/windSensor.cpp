@@ -51,13 +51,13 @@ void WindSensor::update_speed() {
 
 void WindSensor::update_heading(){
   heading_bytes = analogRead(A15);
-  heading = 2 * atan(tan(((float)heading_bytes / 1023 * 2 * M_PI + M_PI)/2)) * 180/M_PI;
-  if(heading>=0){
-    heading  = 180 - heading;
-  }
-  else{
-    heading = -180 - heading;
-  }
+  heading = -2 * atan(tan(((float)heading_bytes / 1023 * 2 * M_PI + M_PI)/2)) * 180/M_PI;
+  // if(heading>=0){
+  //   heading  = 180 - heading;
+  // }
+  // else{
+  //   heading = -180 - heading;
+  // }
   // Serial.print("Wind heading:");
   // Serial.print(heading);
   // Serial.println("°");
