@@ -197,11 +197,19 @@ void nav::linefollowing(float lata, float longa, float latb, float longb){
     // Serial.print("Target angle:");
     // Serial.println(aimed_angle);
     float angle_rudder;
-    angle_rudder = min(max(-angle_ruddermax, angle_ruddermax*sin(sawtooth(heading-aimed_angle)/2)), angle_ruddermax);
-    // Serial.print("Angle rudder:");
+    angle_rudder = angle_ruddermax*sin(sawtooth(heading-aimed_angle)/2);
+    if(cos(heading - aimed_angle) < 0){ // Meaning "if the aimed heading is behind the boat"
+      if(sin(heading - aimed_angle) >= 0){
+        angle_rudder = angle_ruddermax;
+      }
+      else{
+        angle_rudder = - angle_ruddermax;
+      }
+    }    // Serial.print("Angle rudder:");
     // Serial.println(angle_rudder);
     powerboard->set_angle_rudder(angle_rudder);
-    set_sail_pos();
+    float angle_sail = 45 * (cos(angle_truewind - aimed_angle) + 1);
+    powerboard->set_angle_sail(angle_sail);
   }
   else{
     powerboard->send_com_rudder(controler->get_com_rudder());

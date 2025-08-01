@@ -159,18 +159,18 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, listpoints : l
     R = 6371e3
     j = 0
     fig, ax = plt.subplots()
-    ax.xmin=-100
-    ax.xmax=100
-    ax.ymin=-100
-    ax.ymax=100
-    size_factor = 3
+    ax.xmin=0
+    ax.xmax=75
+    ax.ymin=140
+    ax.ymax=210
+    size_factor = 6
     boat_shape = size_factor * np.array([[-0.25, 0, 0.25, 0.25, -0.25, -0.25],
                            [0., 1, 0., -2., -2., 0.]])
     sail_shape = size_factor * np.array([[0., 0.],
                            [0., -0.9]])
     rud_shape = size_factor * np.array([[0., 0.],
                           [-0., -0.3]])
-    arrow_shape = np.array([[0, 0, -0.25, 0, 0.25], 
+    arrow_shape = size_factor / 2 * np.array([[0, 0, -0.25, 0, 0.25], 
                            [0, 2, 1.75, 2, 1.75]])
     rud_angles = conv_rud_com_to_pos(logs[7]) * np.pi / 180
     sail_angles = conv_sail_com_to_pos(logs[8]) * np.pi / 180
@@ -180,9 +180,8 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, listpoints : l
     dir_wind = (logs[5] + logs[3]) * np.pi / 180
     for i in range(len(logs[0])):
         ax.clear()
-        # ax.set_xlim(ax.xmin,ax.xmax)
-        # ax.set_ylim(ax.ymin,ax.ymax)
-        # print(f'i = {i}')
+        ax.set_xlim(ax.xmin,ax.xmax)
+        ax.set_ylim(ax.ymin,ax.ymax)
         start_point = listpoints[j] * np.pi/180
         end_point = listpoints[j+1] * np.pi/180
         xa = R * (start_point[1] - ref_point[1]) * np.cos(ref_point[0])
@@ -201,7 +200,7 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, listpoints : l
                            [np.sin(head[i]), np.cos(head[i])]]) 
         R_rud_re = np.array([[np.cos(rud_angles[i]), -np.sin(rud_angles[i])],
                              [np.sin(rud_angles[i]), np.cos(rud_angles[i])]])
-        R_sail = np.array([[np.cos(sail_angles[i]), -np.sin(sail_angles[i])],
+        R_sail_re = np.array([[np.cos(sail_angles[i]), -np.sin(sail_angles[i])],
                            [np.sin(sail_angles[i]), np.cos(sail_angles[i])]])
         M = np.array([[x[i]], 
                       [y[i]]])
@@ -248,9 +247,15 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, listpoints : l
         R_rud_th = np.array([[np.cos(angle_rudder * np.pi / 180), -np.sin(angle_rudder * np.pi / 180)],
                              [np.sin(angle_rudder * np.pi / 180), np.cos(angle_rudder * np.pi / 180)]])
         
+        angle_sail_th = np.pi / 2 * (np.cos(true_wind_angle - aimed_angle) + 1) / 2
+        R_sail_th = np.array([[np.cos(angle_sail_th), -np.sin(angle_sail_th)],
+                             [np.sin(angle_sail_th), np.cos(angle_sail_th)]])
+        print(f'Angle sail simulated : {angle_sail_th * 180 / np.pi}')
+        print(f'Angle sail real : {sail_angles[i] * 180  / np.pi}')
         arrow_tip_pos = (arrow_pos[0] + true_wind[0, 0], arrow_pos[1] + true_wind[1, 0])
         ax.plot((R_boat @ boat_shape)[0] + x[i], (R_boat @ boat_shape)[1] + y[i], color = ('black' if logs[-1][i] == 0 else 'blue'))
-        ax.plot((R_sail @ R_boat @ sail_shape)[0] + x[i], (R_sail @ R_boat @ sail_shape)[1] + y[i])
+        ax.plot((R_sail_re @ R_boat @ sail_shape)[0] + x[i], (R_sail_re @ R_boat @ sail_shape)[1] + y[i], color = 'green')
+        ax.plot((R_sail_th @ R_boat @ sail_shape)[0] + x[i], (R_sail_th @ R_boat @ sail_shape)[1] + y[i], color = 'red')
         ax.plot((R_boat @ (R_rud_re @ rud_shape - size_factor * np.array([[0], [2]])))[0] + x[i], (R_boat @ (R_rud_re @ rud_shape - size_factor * np.array([[0], [2]])))[1] + y[i], color = 'green')
         ax.plot((R_boat @ (R_rud_th @ rud_shape - size_factor * np.array([[0], [2]])))[0] + x[i], (R_boat @ (R_rud_th @ rud_shape - size_factor * np.array([[0], [2]])))[1] + y[i], color = 'red')
         ax.plot([xa, xb], [ya, yb])
@@ -276,6 +281,6 @@ if __name__ == '__main__' :
     ref_point = np.array([52.4844041, -1.8898449])
     Point1 = np.array([52.485958, -1.889726])
     Point2 = np.array([52.4860084, -1.8889055])
-    toKML(44)
+    toKML(43)
     # generate_animation(read_log(32), ref_point, start_point, end_point)
-    simulate_computing(read_log(44), ref_point, [Point1, Point2, Point1])
+    simulate_computing(read_log(43), ref_point, [Point1, Point2, Point1])
