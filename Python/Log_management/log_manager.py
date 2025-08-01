@@ -143,10 +143,13 @@ def generate_animation(logs : np.ndarray, ref_point : np.ndarray, start_point : 
             pass
     return
 
-def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : np.ndarray, end_point : np.ndarray) -> None:
+def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, listpoints : list) -> None:
     ref_point *= np.pi/180
-    start_point *= np.pi/180
-    end_point *= np.pi/180
+    r = 6
+    q = 1
+    gamma = np.pi/4
+    phi = np.pi/3
+    angle_ruddermax = 50
     lat = logs[1] * np.pi / 180
     long = logs[2] * np.pi / 180
     head = logs[3] * np.pi / 180
@@ -154,26 +157,7 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
     rud_angles = conv_rud_com_to_pos(logs[4]) * np.pi / 180
     sail_angles = conv_sail_com_to_pos(logs[5]) * np.pi / 180
     R = 6371e3
-    xa = R * (start_point[1] - ref_point[1]) * np.cos(ref_point[0])
-    ya = R * (start_point[0] - ref_point[0])
-    A = np.array([[xa], [ya]])
-    print(f'A = {A}')
-    xb = R * (end_point[1] - ref_point[1]) * np.cos(ref_point[0])
-    yb = R * (end_point[0] - ref_point[0])
-    B = np.array([[xb], [yb]])
-    print(f'B = {B}')
-    AB = B - A
-    C = AB / np.linalg.norm(AB)
-    x = R * (long - ref_point[1]) * np.cos(ref_point[0])
-    y = R * (lat - ref_point[0])
-    dir_wind = (logs[5] + logs[3]) * np.pi / 180
-    
-    r = 6
-    q = 1
-    gamma = np.pi/4
-    phi = np.pi/3
-    angle_ruddermax = 50
-    
+    j = 0
     fig, ax = plt.subplots()
     ax.xmin=-100
     ax.xmax=100
@@ -191,26 +175,44 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
     rud_angles = conv_rud_com_to_pos(logs[7]) * np.pi / 180
     sail_angles = conv_sail_com_to_pos(logs[8]) * np.pi / 180
     arrow_pos = (0.85, 0.85)
-    
+    x = R * (long - ref_point[1]) * np.cos(ref_point[0])
+    y = R * (lat - ref_point[0])
+    dir_wind = (logs[5] + logs[3]) * np.pi / 180
     for i in range(len(logs[0])):
-        
         ax.clear()
         # ax.set_xlim(ax.xmin,ax.xmax)
         # ax.set_ylim(ax.ymin,ax.ymax)
         # print(f'i = {i}')
+        start_point = listpoints[j] * np.pi/180
+        end_point = listpoints[j+1] * np.pi/180
+        xa = R * (start_point[1] - ref_point[1]) * np.cos(ref_point[0])
+        ya = R * (start_point[0] - ref_point[0])
+        A = np.array([[xa], 
+                      [ya]])
+        print(f'A = {A}')
+        xb = R * (end_point[1] - ref_point[1]) * np.cos(ref_point[0])
+        yb = R * (end_point[0] - ref_point[0])
+        B = np.array([[xb], 
+                      [yb]])
+        print(f'B = {B}')
+        AB = B - A
+        C = AB / np.linalg.norm(AB)
         R_boat = np.array([[np.cos(head[i]), -np.sin(head[i])],
                            [np.sin(head[i]), np.cos(head[i])]]) 
         R_rud_re = np.array([[np.cos(rud_angles[i]), -np.sin(rud_angles[i])],
-                          [np.sin(rud_angles[i]), np.cos(rud_angles[i])]])
+                             [np.sin(rud_angles[i]), np.cos(rud_angles[i])]])
         R_sail = np.array([[np.cos(sail_angles[i]), -np.sin(sail_angles[i])],
                            [np.sin(sail_angles[i]), np.cos(sail_angles[i])]])
-        
-        
-        M = np.array([[x[i]], [y[i]]])
+        M = np.array([[x[i]], 
+                      [y[i]]])
         print(f'Test time : {logs[0][i]}')
         print(f'M = {M}')
         print(f'Heading = {head[i] * 180 / np.pi}')
         D = M - A
+        if (A - B)[0] * (M - B)[0] + (A - B)[1] * (M - B)[1] < 0 and j < len(listpoints) - 2:
+            j += 1
+        if j == len(listpoints) - 2:
+            print('Fin de parcours.')
         e = C[0][0] * D[1][0] - D[0][0] * C[1][0]
         print(f'e = {e}')
         print(f'SOG = {SOG[i]}')
@@ -226,7 +228,7 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
         print(f'Angle line = {angle_line * 180 / np.pi}')
         
         R_line  = np.array([[np.cos(angle_line), -np.sin(angle_line)],
-                           [np.sin(angle_line), np.cos(angle_line)]])
+                            [np.sin(angle_line), np.cos(angle_line)]])
         angle_nom = sawtooth(angle_line - 2 * gamma * np.arctan(e/r) / np.pi)
         R_nom = np.array([[np.cos(angle_nom), -np.sin(angle_nom)],
                           [np.sin(angle_nom), np.cos(angle_nom)]])
@@ -238,13 +240,13 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
             aimed_angle = angle_nom
         print(f'Aimed angle : {aimed_angle * 180 / np.pi}')
         R_aimed = np.array([[np.cos(aimed_angle), -np.sin(aimed_angle)],
-                          [np.sin(aimed_angle), np.cos(aimed_angle)]])
+                            [np.sin(aimed_angle), np.cos(aimed_angle)]])
         angle_rudder =  min(max(-angle_ruddermax, angle_ruddermax*np.sin(sawtooth(head[i]-aimed_angle)/2)), angle_ruddermax)
         print(f'Angle rudder simulated: {angle_rudder}')
         print(f'Angle rudder real: {rud_angles[i] * 180 / np.pi}')
         
         R_rud_th = np.array([[np.cos(angle_rudder * np.pi / 180), -np.sin(angle_rudder * np.pi / 180)],
-                          [np.sin(angle_rudder * np.pi / 180), np.cos(angle_rudder * np.pi / 180)]])
+                             [np.sin(angle_rudder * np.pi / 180), np.cos(angle_rudder * np.pi / 180)]])
         
         arrow_tip_pos = (arrow_pos[0] + true_wind[0, 0], arrow_pos[1] + true_wind[1, 0])
         ax.plot((R_boat @ boat_shape)[0] + x[i], (R_boat @ boat_shape)[1] + y[i], color = ('black' if logs[-1][i] == 0 else 'blue'))
@@ -269,11 +271,11 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, start_point : 
             plt.pause((logs[0][i+1] - logs[0][i])/1000)
         except IndexError:
             pass
-
+        
 if __name__ == '__main__' :
     ref_point = np.array([52.4844041, -1.8898449])
-    start_point = np.array([52.485958, -1.889726])
-    end_point = np.array([52.4860084, -1.8889055])
-    toKML(42)
+    Point1 = np.array([52.485958, -1.889726])
+    Point2 = np.array([52.4860084, -1.8889055])
+    toKML(44)
     # generate_animation(read_log(32), ref_point, start_point, end_point)
-    simulate_computing(read_log(42), ref_point, start_point, end_point)
+    simulate_computing(read_log(44), ref_point, [Point1, Point2, Point1])

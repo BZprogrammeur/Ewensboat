@@ -151,8 +151,6 @@ void nav::linefollowing(float lata, float longa, float latb, float longb){
     float heading = sawtooth(imu->get_heading() * PI / 180);
     // % r --- the cutoff distance;
     float r = 6.; //Short distance such as 3 meters will hopefully allow the boat to navigate in a narrow canal.
-    // % q --- the tacking variable;
-    float q = 1;
     // % gamma --- the incidence angle;
     float gamma = PI / 4;
     // % phi --- the close hauled angle;

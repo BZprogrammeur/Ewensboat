@@ -47,6 +47,8 @@ private:
     float marge;
     void init_sequence_rud();
     float get_true_wind_dir();
+    // % q --- the tacking variable for the linefollowing;
+    float q = 1;
 };
 
 int getMaxLogIndex();
