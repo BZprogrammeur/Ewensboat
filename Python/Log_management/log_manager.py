@@ -159,10 +159,10 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, listpoints : l
     R = 6371e3
     j = 0
     fig, ax = plt.subplots()
-    ax.xmin=0
-    ax.xmax=75
-    ax.ymin=140
-    ax.ymax=210
+    ax.xmin=-100
+    ax.xmax=100
+    ax.ymin=-100
+    ax.ymax=100
     size_factor = 6
     boat_shape = size_factor * np.array([[-0.25, 0, 0.25, 0.25, -0.25, -0.25],
                            [0., 1, 0., -2., -2., 0.]])
@@ -240,7 +240,9 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, listpoints : l
         print(f'Aimed angle : {aimed_angle * 180 / np.pi}')
         R_aimed = np.array([[np.cos(aimed_angle), -np.sin(aimed_angle)],
                             [np.sin(aimed_angle), np.cos(aimed_angle)]])
-        angle_rudder =  min(max(-angle_ruddermax, angle_ruddermax*np.sin(sawtooth(head[i]-aimed_angle)/2)), angle_ruddermax)
+        angle_rudder = angle_ruddermax*np.sin(head[i]-aimed_angle)
+        if np.cos(head[i] - aimed_angle)<0:
+            angle_rudder = angle_ruddermax * np.sign(np.sin(head[i] - aimed_angle))
         print(f'Angle rudder simulated: {angle_rudder}')
         print(f'Angle rudder real: {rud_angles[i] * 180 / np.pi}')
         
@@ -279,8 +281,13 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, listpoints : l
         
 if __name__ == '__main__' :
     ref_point = np.array([52.4844041, -1.8898449])
-    Point1 = np.array([52.485958, -1.889726])
-    Point2 = np.array([52.4860084, -1.8889055])
-    toKML(43)
+    # Point1 = np.array([52.485958, -1.889726])
+    # Point2 = np.array([52.4860084, -1.8889055])
+    Point1 = np.array([52.4844663, -1.8895039])
+    Point2 = np.array([52.4843069, -1.8905943])
+    Point3 = np.array([52.4845141, -1.8905922])
+    Point4 = np.array([52.4847932, -1.8899488])
+    Point5 = np.array([52.4846881, -1.8896900])
+    toKML(45)
     # generate_animation(read_log(32), ref_point, start_point, end_point)
-    simulate_computing(read_log(43), ref_point, [Point1, Point2, Point1])
+    simulate_computing(read_log(45), ref_point, [Point1, Point2, Point3, Point4, Point5, Point1])

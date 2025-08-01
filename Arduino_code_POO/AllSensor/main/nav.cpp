@@ -282,7 +282,12 @@ void nav::path_following(GPScoord list_points[], int nb_points){
   // init_sequence_rud();
   // delay(1000);
   // }
-  // while(true){}; //Make sure the program won't start over. Might be removed later if we need the program to do something else once it has completed
+  while(true){
+    if(!controler->checkUnmanned()){
+      powerboard->send_com_rudder(controler->get_com_rudder());
+      powerboard->send_com_sail(controler->get_com_sail());
+    }
+  }; //Make sure the program won't start over. Might be removed later if we need the program to do something else once it has completed
   //this part of the mission...
   return;
 }
