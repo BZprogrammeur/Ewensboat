@@ -276,7 +276,7 @@ void nav::path_following(GPScoord list_points[], int nb_points){
     }
     //Note : this architecture should allow for the boat to be brought from one point to another using the controler, and then resuming it's mission
     // in autonoous mode properly.
-    init_sequence_rud();
+    // init_sequence_rud();
   }
   // for(int i = 0; i<3; i++){
   // init_sequence_rud();
@@ -290,6 +290,28 @@ void nav::path_following(GPScoord list_points[], int nb_points){
   }; //Make sure the program won't start over. Might be removed later if we need the program to do something else once it has completed
   //this part of the mission...
   return;
+}
+
+void nav::non_blocking_path_following(GPScoord list_points[], int nb_points){
+  for(int i = 0; i < nb_points - 1; i++){
+    GPScoord starting_point = list_points[i];
+    GPScoord ending_point = list_points[i+1];
+    GPScoord gps_pos = gps->getPoint();
+    Cartcoord start_cart = gps->conversion(starting_point);
+    Cartcoord end_cart = gps->conversion(ending_point);
+    Cartcoord pos_cart = gps->conversion(gps_pos);
+    Cartcoord end2start = diff(start_cart, end_cart);
+    Cartcoord end2pos =  diff(pos_cart, end_cart);
+    while(scalprod(end2start, end2pos) > 0){ // While the boat has not overpassed the end of the line...
+      linefollowing(starting_point.lat, starting_point.lng, ending_point.lat, ending_point.lng);
+      gps_pos = gps->getPoint(); // Updates the 'while' loop's condition
+      pos_cart = gps->conversion(gps_pos);
+      end2pos = diff(pos_cart, end_cart);
+    }
+    //Note : this architecture should allow for the boat to be brought from one point to another using the controler, and then resuming it's mission
+    // in autonoous mode properly.
+    // init_sequence_rud();
+  }
 }
 
 void nav::basic_place_holder(int time_millis){

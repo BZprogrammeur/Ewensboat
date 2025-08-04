@@ -26,6 +26,7 @@ public:
   void update_logs();
   void update();
   void path_following(GPScoord list_points[], int nb_points);
+  void non_blocking_path_following(GPScoord list_points[], int nb_points);
   void basic_place_holder(int time_millis);
 private:
     const float Kp = 2.0;     // Gain proportionnel (à ajuster)
