@@ -22,11 +22,11 @@ public:
   ~nav();
   void follow_cap(float cap_a_suivre);
   void set_sail_pos();
-  void linefollowing(float lata, float longa, float latb, float longb);
+  void linefollowing(float lata, float longa, float latb, float longb, bool integral = false);
   void update_logs();
   void update();
-  void path_following(GPScoord list_points[], int nb_points);
-  void non_blocking_path_following(GPScoord list_points[], int nb_points);
+  void path_following(GPScoord list_points[], int nb_points, bool integral = false);
+  void non_blocking_path_following(GPScoord list_points[], int nb_points, bool integral = false);
   void basic_place_holder(int time_millis);
 private:
     const float Kp = 2.0;     // Gain proportionnel (à ajuster)
@@ -50,6 +50,9 @@ private:
     float get_true_wind_dir();
     // % q --- the tacking variable for the linefollowing;
     float q = 1;
+    float z = 0;
+    float dt = 0.1;
+    float alpha = 0.02;
 };
 
 int getMaxLogIndex();

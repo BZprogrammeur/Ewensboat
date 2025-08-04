@@ -142,7 +142,7 @@ void nav::set_sail_pos(){
   return;
 }
 
-void nav::linefollowing(float lata, float longa, float latb, float longb){
+void nav::linefollowing(float lata, float longa, float latb, float longb, bool integral = false){
   update();
   if(controler->checkUnmanned()){
     // from the Matlab simulation coded by Pr. Jian Wan
@@ -180,16 +180,23 @@ void nav::linefollowing(float lata, float longa, float latb, float longb){
     d.x = m.x - a.x;
     d.y = m.y - a.y;
     float e = c.x * d.y - d.x * c.y;
+    if(e >= 50){
+      z = 0;
+    }
     if(abs(e) > r/2){
         q = e / abs(e);
     }
     // TODO : Clarify the part above about q value.
     float angle_target = sawtooth(atan2(ab.y,ab.x) - (PI/2));
-    float angle_nominal = sawtooth(angle_target-2*gamma*atan(e/r)/PI);
+    if(integral){
+      z += alpha * dt * e;
+    }
+    float angle_nominal = sawtooth(angle_target-2*gamma*atan((e + z)/r)/PI);
 
     float aimed_angle;
     if((cos(angle_truewind-angle_nominal)+cos(phi) < 0) || ((abs(e) < r) && ((cos(angle_truewind-angle_target)+cos(phi)) < 0))){
       aimed_angle= sawtooth(PI + angle_truewind - q * phi);
+      z = 0;
     }
     else{
       aimed_angle=angle_nominal;
@@ -215,7 +222,7 @@ void nav::linefollowing(float lata, float longa, float latb, float longb){
     powerboard->send_com_rudder(controler->get_com_rudder());
     powerboard->send_com_sail(controler->get_com_sail());
   }
-  delay(100);
+  delay(dt * 1000);
   return;
   }
 
@@ -258,7 +265,7 @@ int getMaxLogIndex() {
   return maxIndex;
 }
 
-void nav::path_following(GPScoord list_points[], int nb_points){
+void nav::path_following(GPScoord list_points[], int nb_points, bool integral = false){
   for(int i = 0; i < nb_points - 1; i++){
     GPScoord starting_point = list_points[i];
     GPScoord ending_point = list_points[i+1];
@@ -269,7 +276,7 @@ void nav::path_following(GPScoord list_points[], int nb_points){
     Cartcoord end2start = diff(start_cart, end_cart);
     Cartcoord end2pos =  diff(pos_cart, end_cart);
     while(scalprod(end2start, end2pos) > 0){ // While the boat has not overpassed the end of the line...
-      linefollowing(starting_point.lat, starting_point.lng, ending_point.lat, ending_point.lng);
+      linefollowing(starting_point.lat, starting_point.lng, ending_point.lat, ending_point.lng, integral);
       gps_pos = gps->getPoint(); // Updates the 'while' loop's condition
       pos_cart = gps->conversion(gps_pos);
       end2pos = diff(pos_cart, end_cart);
@@ -277,6 +284,7 @@ void nav::path_following(GPScoord list_points[], int nb_points){
     //Note : this architecture should allow for the boat to be brought from one point to another using the controler, and then resuming it's mission
     // in autonoous mode properly.
     // init_sequence_rud();
+    z = 0;
   }
   // for(int i = 0; i<3; i++){
   // init_sequence_rud();
@@ -284,6 +292,7 @@ void nav::path_following(GPScoord list_points[], int nb_points){
   // }
   while(true){
     if(!controler->checkUnmanned()){
+      z = 0;
       powerboard->send_com_rudder(controler->get_com_rudder());
       powerboard->send_com_sail(controler->get_com_sail());
     }
@@ -292,7 +301,7 @@ void nav::path_following(GPScoord list_points[], int nb_points){
   return;
 }
 
-void nav::non_blocking_path_following(GPScoord list_points[], int nb_points){
+void nav::non_blocking_path_following(GPScoord list_points[], int nb_points, bool integral = false){
   for(int i = 0; i < nb_points - 1; i++){
     GPScoord starting_point = list_points[i];
     GPScoord ending_point = list_points[i+1];
@@ -303,7 +312,7 @@ void nav::non_blocking_path_following(GPScoord list_points[], int nb_points){
     Cartcoord end2start = diff(start_cart, end_cart);
     Cartcoord end2pos =  diff(pos_cart, end_cart);
     while(scalprod(end2start, end2pos) > 0){ // While the boat has not overpassed the end of the line...
-      linefollowing(starting_point.lat, starting_point.lng, ending_point.lat, ending_point.lng);
+      linefollowing(starting_point.lat, starting_point.lng, ending_point.lat, ending_point.lng, integral);
       gps_pos = gps->getPoint(); // Updates the 'while' loop's condition
       pos_cart = gps->conversion(gps_pos);
       end2pos = diff(pos_cart, end_cart);
@@ -311,6 +320,7 @@ void nav::non_blocking_path_following(GPScoord list_points[], int nb_points){
     //Note : this architecture should allow for the boat to be brought from one point to another using the controler, and then resuming it's mission
     // in autonoous mode properly.
     // init_sequence_rud();
+    z = 0;
   }
 }
 

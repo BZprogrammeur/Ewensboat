@@ -11,9 +11,10 @@ uint8_t servosail = 0;
 uint8_t servorud = 1;
 
 int controlpin = 23;
+int verticalpin = 25;
 int elevationpin = 3;
 int aileronpin = 2;
-int elevation, aileron, com_sail, com_rud, control;
+int elevation, aileron, com_sail, com_rud, control, vertical;
 
 bool unmaned = false;
 int compteur = 0;
@@ -23,6 +24,7 @@ void setup() {
     pinMode(elevationpin, INPUT);
     pinMode(aileronpin, INPUT);
     pinMode(controlpin, INPUT);
+    pinMode(verticalpin, INPUT);
     // pwm.begin();
     // pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
 }
@@ -37,4 +39,8 @@ void loop() {
   control = pulseIn(controlpin, HIGH);
   Serial.print("; Control : ");
   Serial.println(control);
+  // control = pulseIn(verticalpin, HIGH);
+  // Serial.print("; Vertical : ");
+  // Serial.println(vertical);
+  delay(100);
 }
