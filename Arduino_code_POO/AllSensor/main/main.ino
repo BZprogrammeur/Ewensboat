@@ -12,6 +12,7 @@ void setup() {
 }
 
 void loop() {
+  navigator->run_mission();
   // Dry test line 1
   // navigator->linefollowing(52.4844663, -1.8895039, 52.4843069, -1.8905943);
   
@@ -32,13 +33,13 @@ void loop() {
 
   // Water test loop 1
   // Note : Point 5 is close to the edge and might have to be removed.
-  GPScoord Point1 = {52.42918, -1.94642};
-  GPScoord Point2 = {52.42924, -1.94659};
-  GPScoord Point3 = {52.42940, -1.94662};
-  GPScoord Point4 = {52.42958, -1.94590};
-  GPScoord Point5 = {52.429331, -1.945867};
-  GPScoord listpoints[] = {Point1, Point2, Point3, Point4, Point5, Point1};
-  navigator->path_following(listpoints, 6);
+  // GPScoord Point1 = {52.42918, -1.94642};
+  // GPScoord Point2 = {52.42924, -1.94659};
+  // GPScoord Point3 = {52.42940, -1.94662};
+  // GPScoord Point4 = {52.42958, -1.94590};
+  // GPScoord Point5 = {52.429331, -1.945867};
+  // GPScoord listpoints[] = {Point1, Point2, Point3, Point4, Point5, Point1};
+  // navigator->path_following(listpoints, 6);
 
   // Water test line 1
   // GPSCoord Point1 = {52.42953, -1.94514};

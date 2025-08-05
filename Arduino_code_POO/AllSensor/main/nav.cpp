@@ -21,11 +21,11 @@ nav::nav() : Kp(2.0), Kd(1.0), DELTA_T(0.1) {
   wind = new WindSensor();
   Serial.println("Wind sensor ready.");
   gps = new GPS();
-  while(!gps->isValid()){
-    Serial.println("Searching for GPS...");
-    powerboard->set_angle_rudder(50 * cos(2 * PI *millis() / (5000)));
-    gps->update();
-  }
+  // while(!gps->isValid()){
+  //   Serial.println("Searching for GPS...");
+  //   powerboard->set_angle_rudder(50 * cos(2 * PI *millis() / (5000)));
+  //   gps->update();
+  // }
   Serial.println("GPS ready.");
   controler = new Controler();
   Serial.println("Controler ready.");
@@ -99,6 +99,7 @@ void nav::update(){
   // Serial.println(wind->get_wind_direction());
   // wind speed automatically updates every 2.25 seconds.
   gps->update();
+  controler->update();
   update_logs();
   return;
 }
@@ -316,6 +317,9 @@ void nav::non_blocking_path_following(GPScoord list_points[], int nb_points, boo
       gps_pos = gps->getPoint(); // Updates the 'while' loop's condition
       pos_cart = gps->conversion(gps_pos);
       end2pos = diff(pos_cart, end_cart);
+      if(!controler->checkUnmanned()){
+        return;
+      }
     }
     //Note : this architecture should allow for the boat to be brought from one point to another using the controler, and then resuming it's mission
     // in autonoous mode properly.
@@ -331,4 +335,41 @@ void nav::basic_place_holder(int time_millis){
     powerboard->set_angle_sail(SERVOMAX_SAIL); // Set the sail free/loose
   }
   return;
+}
+
+void nav::run_mission(){
+  update();
+  int scenario = controler->get_scenario_number();
+  switch(scenario){
+    case 0:
+      // Water test loop 1
+      // Note : Point 5 is close to the edge and might have to be removed.
+      GPScoord Point10 = {52.42918, -1.94642};
+      GPScoord Point20 = {52.42924, -1.94659};
+      GPScoord Point30 = {52.42940, -1.94662};
+      GPScoord Point40 = {52.42958, -1.94590};
+      GPScoord Point50 = {52.429331, -1.945867};
+      GPScoord listpoints0[] = {Point10, Point20, Point30, Point40, Point50, Point10};
+      non_blocking_path_following(listpoints0, 6);
+      break;
+    case 1:
+      // Water test line 1
+      GPScoord Point11 = {52.42953, -1.94514};
+      GPScoord Point21 = {52.42945, -1.94673};
+      GPScoord listpoints1[] = {Point11, Point21, Point11};
+      non_blocking_path_following(listpoints1, 3);
+      break;
+    case 2:
+      // Water test line 2
+      // Note : Very short line intended to test position holding.
+      GPScoord Point12 = {52.42939, -1.94654};
+      GPScoord Point22 = {52.42936, -1.94652};
+      GPScoord listpoints2[] = {Point12, Point22, Point12};
+      non_blocking_path_following(listpoints2, 3);
+      break;
+    case 9:
+      powerboard->send_com_rudder(controler->get_com_rudder());
+      powerboard->send_com_sail(controler->get_com_sail());
+      break;
+  }
 }

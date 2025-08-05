@@ -10,12 +10,13 @@ public:
     void update();
     int get_elevation();
     int get_aileron();
-    void update_commands();
+    // void update_commands();
     bool unmanned_status();
     bool checkUnmanned();
     int get_control_value();
     int get_com_rudder();
     int get_com_sail();
+    int get_scenario_number();
 private:
     const int controlPin = 23;
     const int elevationPin = 3;
