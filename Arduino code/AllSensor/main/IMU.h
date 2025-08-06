@@ -2,27 +2,18 @@
 #define IMU_H
 
 #include <Arduino.h>
-#include <Wire.h>
+#include "config.h"
 
 class IMU {
 public:
     IMU();
-    void init();
     void update();
+    void init();
     float get_cap();
+    bool calibrate();
 
 private:
-    unsigned char angle8;
-    unsigned char high_byte;
-    unsigned char low_byte;
-    char pitch;
-    char roll;
-    unsigned int angle16;
-    double cap;
-
-
-    static const int CMPS12_ADDRESS = 0x60; // Adresse I2C du CMPS12
-    static const int ANGLE_8 = 0x00;        // Registre pour l'angle 8 bits
+    float cap;
 };
 
 #endif 

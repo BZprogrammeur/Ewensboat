@@ -1,60 +1,74 @@
-#include <Arduino.h>
-#include <Wire.h>
 #include "IMU.h"
 
-#define CMPS12_ADDRESS 0x60  // Address of CMPS12 shifted right one bit for arduino wire library
-#define ANGLE_8  1           // Register to read 8bit angle from
+IMU* imuInstance = nullptr;
 
-IMU::IMU()
-{
-    angle8 = 0;
-    high_byte = 0;
-    low_byte = 0;
-    pitch = 0;
-    roll = 0;
-    angle16 = 0;
-    cap = 0.0;
-}
+IMU::IMU(){}
 
-void IMU::init()
-{
-    Serial.begin(9600); 
-    Wire.begin();
-    Serial.println("Initialisation IMU...");
+void IMU::init(){
+  Serial.println("Initialising IMU...");
+  cap = 0.0;
+  CMPS12_SERIAL.begin(9600);
+  //calibrate();
 }
 
 void IMU::update()
 {
-    Wire.beginTransmission(CMPS12_ADDRESS);  //starts communication with CMPS12
-    Wire.write(ANGLE_8);                     //Sends the register we wish to start reading from
-    Wire.endTransmission();
-
-    // Request 5 bytes from the CMPS12
-    // this will give us the 8 bit bearing, 
-    // both bytes of the 16 bit bearing, pitch and roll
-    Wire.requestFrom(CMPS12_ADDRESS, 5);       
-
-    unsigned long timeout = millis();
-    while (Wire.available() < 5) {
-      if (millis() - timeout > 500) {
-        Serial.println("Timeout I2C : données IMU non disponibles.");
-        return;  // abandonne la fonction
-      }
-    }        // Wait for all bytes to come back
-
-    angle8 = Wire.read();               // Read back the 5 bytes
-    high_byte = Wire.read();
-    low_byte = Wire.read();
-    pitch = Wire.read();
-    roll = Wire.read();
-
-    angle16 = high_byte;                 // Calculate 16 bit angle
-    angle16 <<= 8;
-    angle16 += low_byte;
-
-    cap = angle16 / 10;               
+  CMPS12_SERIAL.write(ANGLE_16);  // Request 16 bit angle
+  while(CMPS12_SERIAL.available() < 2); // Wait for full angle (16 bits = 2 bytes)
+  unsigned char high_byte = CMPS12_SERIAL.read();
+  unsigned char low_byte = CMPS12_SERIAL.read();
+  unsigned int angle16 = high_byte;           // Calculate 16 bit angle
+  angle16 <<= 8;
+  angle16 += low_byte;
+  cap = angle16 / 10 + (float)(angle16%10)/10 - 180; 
+  //Serial.print("Angle:");
+  //Serial.println(cap);
+  return;           
 }
 
 float IMU::get_cap(){
-  return fmod((cap+180),360);
+  //Serial.print("Current heading:");
+  //Serial.println(cap);
+  return cap;
+}
+
+bool IMU::calibrate(){
+  // Code made by Titouan Leost : https://github.com/TitouanLeost/Aston-Autonomous-Sailboat-2024
+  // Erasing calibration data stored in the IMU:
+  Serial.println("Calibration started...");
+  CMPS12_SERIAL.write(0xE0);
+  while(CMPS12_SERIAL.available() < 1);
+  CMPS12_SERIAL.read();
+  CMPS12_SERIAL.write(0xE5);
+  while(CMPS12_SERIAL.available() < 1);
+  CMPS12_SERIAL.read();
+  CMPS12_SERIAL.write(0xE2);
+  while(CMPS12_SERIAL.available() < 1);
+  CMPS12_SERIAL.read();
+  Serial.println("Checking calibration status...");
+  CMPS12_SERIAL.write(CMPS12_CALIBRATION_STATUS);
+  while(CMPS12_SERIAL.available() < 1);
+  unsigned char status = CMPS12_SERIAL.read();
+  int count = 0;
+  while(count < 50 or status < 255) {
+    CMPS12_SERIAL.write(CMPS12_CALIBRATION_STATUS);
+    while(CMPS12_SERIAL.available() < 1);
+    status = CMPS12_SERIAL.read();
+    Serial.println(int(status), BIN);
+    if(status == 255){
+        count += 1;
+    }
+    delay(100);
+  }
+  CMPS12_SERIAL.write(0xF0);
+  while(CMPS12_SERIAL.available() < 1);
+  CMPS12_SERIAL.read();
+  CMPS12_SERIAL.write(0xF5);
+  while(CMPS12_SERIAL.available() < 1);
+  CMPS12_SERIAL.read();
+  CMPS12_SERIAL.write(0xF6);
+  while(CMPS12_SERIAL.available() < 1);
+  CMPS12_SERIAL.read();
+  Serial.println("Calibration done");
+  return true;
 }

@@ -2,27 +2,27 @@
 #define CONTROLER_H
 
 #include <Arduino.h>
-#include <Wire.h>
-#include <Adafruit_PWMServoDriver.h>
 #include "config.h"
 
 class Controler {
 public:
     Controler();
+    void update();
     void init();
-    void controling();
-    void setUnmanned();
-    
-    bool unmanned = false;
+    int get_elevation();
+    int get_aileron();
+    void update_commands();
+    bool unmanned_status();
+    bool checkUnmanned();
+    int get_control_value();
+    int get_com_rudder();
+    int get_com_sail();
 private:
-    Adafruit_PWMServoDriver pwm;
-
     const int controlPin = 23;
     const int elevationPin = 3;
     const int aileronPin = 2;
-
     int elevation, aileron, comSail, comRud, controlValue;
-    int compteur = 0;
+    bool unmanned = true;
 };
 
 #endif // CONTROLER_H

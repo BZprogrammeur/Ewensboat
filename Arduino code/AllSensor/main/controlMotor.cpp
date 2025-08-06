@@ -102,3 +102,11 @@ void controlMotor::set_angle_rudder(int angle)
 float controlMotor::getSailPos(){
   return angle_sail;
 }
+
+void controlMotor::send_com_rudder(int com){
+  pwm.setPWM(SERVO_RUDDER, 0, com);
+}
+
+void controlMotor::send_com_sail(int com){
+  pwm.setPWM(SERVO_SAIL, 0, com);
+}

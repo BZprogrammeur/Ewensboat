@@ -16,7 +16,10 @@ public:
     void follow_cap(float cap_a_suivre);
     void reach_point(GPScoord point);
     void line_following(GPScoord arrival, GPScoord startline);
+    void follow_path(GPScoord chemin[], int taille);
+    void follow_path2(GPScoord chemin[], int taille);
     void stopSailing();
+    bool check_radius(float r, GPScoord centre, GPScoord pos);
     void count4tacking();
     void CheckTacking();
     bool getTacking();
@@ -39,6 +42,8 @@ private:
 
     //Pour les datas
     float angle_rudder = 0;
+
+    int i = 0;
     
     IMU& imu;
     controlMotor& powerboard;
