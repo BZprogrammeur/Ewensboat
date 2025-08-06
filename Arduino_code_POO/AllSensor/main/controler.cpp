@@ -82,11 +82,11 @@ int Controler::get_scenario_number(){
     scenario += 2;
     // Serial.println("Added 2.");
   }
-  // Serial.print("Aileron : ");
-  // Serial.print(aileron);
-  // Serial.print("; Elevation : ");
-  // Serial.print(elevation);
-  // Serial.print("; Control : ");
-  // Serial.println(controlValue);
+  Serial.print("Aileron : ");
+  Serial.print(aileron);
+  Serial.print("; Elevation : ");
+  Serial.print(elevation);
+  Serial.print("; Control : ");
+  Serial.println(controlValue);
   return scenario;
 }
