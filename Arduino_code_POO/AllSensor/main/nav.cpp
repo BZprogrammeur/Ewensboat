@@ -345,48 +345,80 @@ void nav::run_mission(){
   // Serial.print("Scenario :");
   // Serial.println(scenario);
   if(scenario == 0){
-    // Water test loop 1
-    // Note : Point 5 is close to the edge and might have to be removed.
+    // Water test line 1
     Serial.println("Scenario 0");
-    GPScoord Point10 = {52.42918, -1.94642};
-    GPScoord Point20 = {52.42924, -1.94659};
-    GPScoord Point30 = {52.42940, -1.94662};
-    GPScoord Point40 = {52.42958, -1.94590};
-    GPScoord Point50 = {52.429331, -1.945867};
-    GPScoord listpoints0[] = {Point10, Point20, Point30, Point40, Point50, Point10};
-    non_blocking_path_following(listpoints0, 6);
+    GPScoord Point10 = {52.42953, -1.94514};
+    GPScoord Point20 = {52.42945, -1.94673};
+    GPScoord listpoints0[] = {Point10, Point20, Point10};
+    non_blocking_path_following(listpoints0, 3);
   }
   else if(scenario == 1){
-    // Water test line 1
+    // Water test loop 1
     Serial.println("Scenario 1");
-    GPScoord Point11 = {52.42953, -1.94514};
-    GPScoord Point21 = {52.42945, -1.94673};
-    GPScoord listpoints1[] = {Point11, Point21, Point11};
-    non_blocking_path_following(listpoints1, 3);
+    GPScoord Point11 = {52.429209, -1.946479};
+    GPScoord Point21 = {52.429459, -1.946778};
+    GPScoord Point31 = {52.429506, -1.946167};
+    GPScoord listpoints1[] = {Point11, Point21, Point31, Point11};
+    non_blocking_path_following(listpoints1, 4);
   }
   else if(scenario == 2){
     // Water test line 2
     // Note : Very short line intended to test position holding.
     Serial.println("Scenario 2");
-    GPScoord Point12 = {52.42939, -1.94654};
-    GPScoord Point22 = {52.42936, -1.94652};
+    GPScoord Point12 = {52.429447, -1.946549};
+    GPScoord Point22 = {52.429254, -1.946549};
     GPScoord listpoints2[] = {Point12, Point22, Point12};
     non_blocking_path_following(listpoints2, 3);
   }
   else if(scenario == 3){
+    // Water test loop 2
+    // Note : goes through the whole lake.
     Serial.println("Scenario 3");
+    GPScoord Point13 = {52.429172, -1.946466};
+    GPScoord Point23 = {52.429455, -1.946765};
+    GPScoord Point33 = {52.429542, -1.945092};
+    GPScoord Point43 = {52.429352, -1.946129};
+    GPScoord listpoints3[] = {Point13, Point23, Point33, Point43, Point13};
+    non_blocking_path_following(listpoints3, 5);
   }
   else if(scenario == 4){
+    //Water test line 1
     Serial.println("Scenario 4");
+    GPScoord Point10 = {52.42953, -1.94514};
+    GPScoord Point20 = {52.42945, -1.94673};
+    GPScoord listpoints0[] = {Point10, Point20, Point10};
+    non_blocking_path_following(listpoints0, 3, true);
   }
   else if(scenario == 5){
+    // Water test loop 1
     Serial.println("Scenario 5");
+    GPScoord Point11 = {52.429209, -1.946479};
+    GPScoord Point21 = {52.429459, -1.946778};
+    GPScoord Point31 = {52.429506, -1.946167};
+    GPScoord listpoints1[] = {Point11, Point21, Point31, Point11};
+    non_blocking_path_following(listpoints1, 4, true);
   }
   else if(scenario == 6){
+    // Water test loop 2
+    // Note : goes through the whole lake.
     Serial.println("Scenario 6");
+    GPScoord Point13 = {52.429172, -1.946466};
+    GPScoord Point23 = {52.429455, -1.946765};
+    GPScoord Point33 = {52.429542, -1.945092};
+    GPScoord Point43 = {52.429352, -1.946129};
+    GPScoord listpoints3[] = {Point13, Point23, Point33, Point43, Point13};
+    non_blocking_path_following(listpoints3, 5, true);
   }
   else if(scenario == 7){
+    // Dry test loop 
     Serial.println("Scenario 7");
+    GPScoord Point1 = {52.4844663, -1.8895039};
+    GPScoord Point2 = {52.4843069, -1.8905943};
+    GPScoord Point3 = {52.4845141, -1.8905922};
+    GPScoord Point4 = {52.4847932, -1.8899488};
+    GPScoord Point5 = {52.4846881, -1.8896900};
+    GPScoord listpoints[] = {Point1, Point2, Point3, Point4, Point5, Point1};
+    non_blocking_path_following(listpoints, 6, true);
   }
   else if(scenario == 9){
       Serial.println("Manual control");
