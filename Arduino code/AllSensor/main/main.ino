@@ -31,12 +31,12 @@ GPScoord cornerParking = {52.486308, -1.886213};
 GPScoord flecheAnglaise = {52.485827, -1.885899};
 GPScoord entryParking = {52.485067, -1.886799};
 GPScoord ESBenergy = {52.486141, -1.887731};
-GPScoord pointLac1 = {52.429147, -1.946416};
-GPScoord pointLac2 = {52.429513, -1.946741};
-GPScoord pointLac3 = {52.429551, -1.945068};
+GPScoord pointLac1 = {52.429233, -1.946685};
+GPScoord pointLac2 = {52.429465, -1.946741};
+GPScoord pointLac3 = {52.429524, -1.945309};
 GPScoord pointLac4 = {52.429329, -1.945999};
 
-GPScoord cheminLac[4] = {pointLac1, pointLac2, pointLac3, pointLac4};
+GPScoord cheminLac[4] = {pointLac1, pointLac2, pointLac3};
 GPScoord chemin[7]= {rondpoint, cornerBuilding, cornerParking, flecheAnglaise, entryParking, ESBenergy, rondpoint};
 
 void setup() {
@@ -60,10 +60,10 @@ void loop() {
 //    float cap_cible = 135.0;  // cap cible en degrés
 //    nav.follow_cap(cap_cible);
     
-    nav.follow_path2(chemin, 7);
-    //nav.reach_point(point_cible);
+    nav.follow_path2(cheminLac, 3);
+    //nav.reach_point(point_cible);çà
     //nav.line_following(SU, eastSide);
-//   nav.set_sail_pos();
+    nav.set_sail_pos();
   }
   else
   {
