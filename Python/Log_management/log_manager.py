@@ -217,7 +217,7 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, listpoints : l
         print(f'SOG = {SOG[i]}')
         true_wind = np.array([[SOG[i] * np.sin(head[i]) - logs[6][i] * np.sin(dir_wind[i])], 
                               [SOG[i] * np.cos(head[i]) - logs[6][i] * np.cos(dir_wind[i])]])
-        true_wind_angle = sawtooth(np.arctan2(true_wind[1][0], true_wind[0][0]) - (np.pi / 2))
+        true_wind_angle = sawtooth(np.arctan2(true_wind[0][0], true_wind[1][0]) - (np.pi))
         print(f'true wind : {true_wind}')
         print(f'true wind angle : {true_wind_angle * 180 / np.pi}')
         if abs(e) > r/2:

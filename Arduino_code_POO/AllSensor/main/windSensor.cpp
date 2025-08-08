@@ -58,7 +58,7 @@ void WindSensor::update_heading(){
   // else{
   //   heading = -180 - heading;
   // }
-  // Serial.print("Wind heading:");
+  // Serial.print("Apparent wind heading:");
   // Serial.print(heading);
   // Serial.println("°");
 }

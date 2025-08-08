@@ -25,7 +25,7 @@ elseif casenumber == 5
        ab = [-180 180;-180 180];
        x0=[-150;-150;0;1;0];angle_rudder0=pi/6;angle_sail0=pi/4;
 elseif casenumber == 6
-       angle_truewind = -3*pi/4;
+       angle_truewind = 0;
        ab = [-180 180;-180 180];
        x0=[-150;-150;0;1;0];angle_rudder0=pi/6;angle_sail0=pi/4;
 end

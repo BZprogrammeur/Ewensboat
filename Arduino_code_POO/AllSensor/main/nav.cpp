@@ -21,11 +21,11 @@ nav::nav() : Kp(2.0), Kd(1.0), DELTA_T(0.1) {
   wind = new WindSensor();
   Serial.println("Wind sensor ready.");
   gps = new GPS();
-  while(!gps->isValid()){
-    Serial.println("Searching for GPS...");
-    powerboard->set_angle_rudder(50 * cos(2 * PI *millis() / (5000)));
-    gps->update();
-  }
+  // while(!gps->isValid()){
+  //   Serial.println("Searching for GPS...");
+  //   powerboard->set_angle_rudder(50 * cos(2 * PI *millis() / (5000)));
+  //   gps->update();
+  // }
   Serial.println("GPS ready.");
   controler = new Controler();
   Serial.println("Controler ready.");
@@ -160,6 +160,8 @@ void nav::linefollowing(float lata, float longa, float latb, float longb, bool i
     float angle_ruddermax = 50;
     // % angle_truewind --- the true wind direction;
     float angle_truewind = get_true_wind_dir();
+    // Serial.print("True wind heading : ");
+    // Serial.println(angle_truewind * 180 / PI);
 
     GPScoord pos_gps = gps->getPoint();
     Cartcoord m = gps->conversion(pos_gps);
@@ -235,10 +237,9 @@ float nav::get_true_wind_dir(){
   float COG = imu->get_heading() * PI / 180; // technically false but good enough approximation as the GPS is very unprecise and the boat doesn't drift much.
   float AWS = wind->get_wind_speed() ;
   float AWD = sawtooth((wind->get_wind_direction() + imu->get_heading()) * PI / 180);
-
   float u = SOG * sin(COG) - AWS * sin(AWD);
   float v = SOG * cos(COG) - AWS * cos(AWD);
-  return sawtooth(atan2(v, u) - (PI / 2));
+  return sawtooth(atan2(u, v) - PI);
 }
 
 int getMaxLogIndex() {
