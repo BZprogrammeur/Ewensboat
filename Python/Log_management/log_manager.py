@@ -70,25 +70,15 @@ def conv_rud_com_to_pos(com: np.ndarray) -> np.ndarray:
 def conv_sail_com_to_pos(com: np.ndarray) -> np.ndarray:
     return np.clip(map2(com, 225, 350, 0, 90), 0, 90)
     
-def generate_animation(logs : np.ndarray, ref_point : np.ndarray, start_point : np.ndarray, end_point : np.ndarray) -> None:
+def generate_animation(logs : np.ndarray, ref_point : np.ndarray) -> None:
     ref_point *= np.pi/180
-    start_point *= np.pi/180
-    end_point *= np.pi/180
     lat = logs[1] * np.pi / 180
     long = logs[2] * np.pi / 180
-    head = - logs[3] * np.pi / 180 + np.pi / 2
+    head = logs[3] * np.pi / 180
     SOG = logs[4]
     rud_angles = conv_rud_com_to_pos(logs[7]) * np.pi / 180
     sail_angles = conv_sail_com_to_pos(logs[8]) * np.pi / 180
     R = 6371e3
-    xa = R * (start_point[1] - ref_point[1]) * np.cos(ref_point[0])
-    print(f'xa = {xa}')
-    ya = R * (start_point[0] - ref_point[0])
-    print(f'ya = {ya}')
-    xb = R * (end_point[1] - ref_point[1]) * np.cos(ref_point[0])
-    print(f'xb = {xb}')
-    yb = R * (end_point[0] - ref_point[0])
-    print(f'yb = {yb}')
     x = R * (long - ref_point[1]) * np.cos(ref_point[0])
     y = R * (lat - ref_point[0])
     print(f'x = {x}')
@@ -99,7 +89,7 @@ def generate_animation(logs : np.ndarray, ref_point : np.ndarray, start_point : 
     ax.xmax=100
     ax.ymin=-100
     ax.ymax=100
-    size_factor = 3
+    size_factor = 9
     dir_wind = sawtooth((logs[5] + logs[3]) * np.pi / 180)
     boat_shape = size_factor * np.array([[-0.25, 0, 0.25, 0.25, -0.25, -0.25],
                            [0., 1, 0., -2., -2., 0.]])
@@ -110,35 +100,39 @@ def generate_animation(logs : np.ndarray, ref_point : np.ndarray, start_point : 
     arrow_pos = (0.85, 0.85)
     for i in range(len(logs[0])):
         ax.clear()
-        # ax.set_xlim(ax.xmin,ax.xmax)
-        # ax.set_ylim(ax.ymin,ax.ymax)
+        ax.set_xlim(ax.xmin,ax.xmax)
+        ax.set_ylim(ax.ymin,ax.ymax)
         # print(f'i = {i}')
         R_boat = np.array([[np.cos(head[i]), -np.sin(head[i])],
                            [np.sin(head[i]), np.cos(head[i])]]) 
-        R_rud = np.array([[np.cos(rud_angles[i]), -np.sin(rud_angles[i])],
-                          [np.sin(rud_angles[i]), np.cos(rud_angles[i])]])
-        R_sail = np.array([[np.cos(sail_angles[i]), -np.sin(sail_angles[i])],
+        R_rud_re = np.array([[np.cos(rud_angles[i]), -np.sin(rud_angles[i])],
+                             [np.sin(rud_angles[i]), np.cos(rud_angles[i])]])
+        R_sail_re = np.array([[np.cos(sail_angles[i]), -np.sin(sail_angles[i])],
                            [np.sin(sail_angles[i]), np.cos(sail_angles[i])]])
-        arrow_tip = np.array([[SOG[i] * np.sin(head[i]) - logs[6][i] * np.sin(dir_wind[i])], 
+        true_wind = np.array([[SOG[i] * np.sin(head[i]) - logs[6][i] * np.sin(dir_wind[i])], 
                               [SOG[i] * np.cos(head[i]) - logs[6][i] * np.cos(dir_wind[i])]])
-        arrow_tip_pos = (arrow_pos[0] + arrow_tip[0, 0], arrow_pos[1] + arrow_tip[1, 0])
+        true_wind_angle = sawtooth(np.arctan2(true_wind[0][0], true_wind[1][0]) - (np.pi))
+        print(f'true wind : {true_wind}')
+        print(f'true wind angle : {true_wind_angle * 180 / np.pi}')
+        true_wind = np.array([[0, -1], [1, 0]]) @ true_wind
+        if np.linalg.norm(true_wind) != 0:
+            arrow_tip_pos = (arrow_pos[0] + 0.15 * true_wind[0, 0] / np.linalg.norm(true_wind), arrow_pos[1] + 0.15 * true_wind[1, 0] / np.linalg.norm(true_wind))
+            ax.annotate(
+                '', 
+                xy=arrow_tip_pos, xycoords='axes fraction',
+                xytext=arrow_pos, textcoords='axes fraction',
+                arrowprops=dict(facecolor='red', shrink=0.05)
+                )
+            ax.text(0.7, 0.8, f'True wind speed : {np.linalg.norm(true_wind)}',
+                    transform=ax.transAxes,
+                    fontsize=8)
         # print((R_boat @ boat_shape)[0] + x[i])
-        ax.plot((R_boat @ boat_shape)[0] + x[i], (R_boat @ boat_shape)[1] + y[i])
-        ax.plot((R_sail @ R_boat @ sail_shape)[0] + x[i], (R_sail @ R_boat @ sail_shape)[1] + y[i])
-        ax.plot((R_boat @ (R_rud @ rud_shape - size_factor * np.array([[0], [2]])))[0] + x[i], (R_boat @ (R_rud @ rud_shape - size_factor * np.array([[0], [2]])))[1] + y[i])
-        ax.plot([xa, xb], [ya, yb])
+        ax.plot((R_boat @ boat_shape)[0] + x[i], (R_boat @ boat_shape)[1] + y[i], color = ('black' if logs[-1][i] == 0 else 'blue'))
+        ax.plot((R_sail_re @ R_boat @ sail_shape)[0] + x[i], (R_sail_re @ R_boat @ sail_shape)[1] + y[i], color = 'green')
+        ax.plot((R_boat @ (R_rud_re @ rud_shape - size_factor * np.array([[0], [2]])))[0] + x[i], (R_boat @ (R_rud_re @ rud_shape - size_factor * np.array([[0], [2]])))[1] + y[i], color = 'green')
         ax.plot(x[:i+1], y[:i+1], 'b')
-        ax.annotate(
-            '', 
-            xy=arrow_tip_pos, xycoords='axes fraction',
-            xytext=arrow_pos, textcoords='axes fraction',
-            arrowprops=dict(facecolor='red', shrink=0.05)
-            )
-        ax.text(0.7, 0.8, f'Apparent wind speed : {logs[6][i]}',
-                transform=ax.transAxes,
-                fontsize=8)
         try:
-            plt.pause((time[i+1] - time[i])/1000)
+            plt.pause((time[i+1] - time[i])/10000)
         except IndexError:
             pass
     return
@@ -271,7 +265,7 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, listpoints : l
             xytext=arrow_pos, textcoords='axes fraction',
             arrowprops=dict(facecolor='red', shrink=0.05)
             )
-        ax.text(0.7, 0.8, f'Apparent wind speed : {logs[6][i]}',
+        ax.text(0.7, 0.8, f'True wind speed : {np.linalg.norm(true_wind)}',
                 transform=ax.transAxes,
                 fontsize=8)
         try:
@@ -280,14 +274,15 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, listpoints : l
             pass
         
 if __name__ == '__main__' :
-    ref_point = np.array([52.4844041, -1.8898449])
+    # ref_point = np.array([52.4844041, -1.8898449])
     # Point1 = np.array([52.485958, -1.889726])
     # Point2 = np.array([52.4860084, -1.8889055])
-    Point1 = np.array([52.4844663, -1.8895039])
-    Point2 = np.array([52.4843069, -1.8905943])
-    Point3 = np.array([52.4845141, -1.8905922])
-    Point4 = np.array([52.4847932, -1.8899488])
-    Point5 = np.array([52.4846881, -1.8896900])
-    toKML(45)
-    # generate_animation(read_log(32), ref_point, start_point, end_point)
-    simulate_computing(read_log(45), ref_point, [Point1, Point2, Point3, Point4, Point5, Point1])
+    # Point1 = np.array([52.4844663, -1.8895039])
+    # Point2 = np.array([52.4843069, -1.8905943])
+    # Point3 = np.array([52.4845141, -1.8905922])
+    # Point4 = np.array([52.4847932, -1.8899488])
+    # Point5 = np.array([52.4846881, -1.8896900])
+    water_refpoint = np.array([52.429363, -1.946551])
+    toKML(46)
+    generate_animation(read_log(46), water_refpoint)
+    # simulate_computing(read_log(45), ref_point, [Point1, Point2, Point3, Point4, Point5, Point1])
