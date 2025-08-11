@@ -79,7 +79,9 @@ void nav::update_logs(){
   logfile.print(' ');
   logfile.print(powerboard->get_com_sail());
   logfile.print(' ');
-  logfile.println(controler->unmanned_status());
+  logfile.print(controler->unmanned_status());
+  logfile.print(' ');
+  logfile.println(scenario);
   logfile.close();
   //TODO : adapt controler class to finish the log function
   return;
@@ -93,14 +95,16 @@ nav::~nav() {
     delete controler;
 }
 
-void nav::update(){
+void nav::update(bool save_logs = true){
   imu->update();
   wind->update_heading();
   // Serial.println(wind->get_wind_direction());
   // wind speed automatically updates every 2.25 seconds.
   gps->update();
   controler->update();
+  if(save_logs){
   update_logs();
+  }
   return;
 }
 
@@ -341,15 +345,15 @@ void nav::basic_place_holder(int time_millis){
 }
 
 void nav::run_mission(){
-  update();
+  update(false);
   scenario = (int)controler->get_scenario_number();
   // Serial.print("Scenario :");
   // Serial.println(scenario);
   if(scenario == 0){
     // Water test line 1
     Serial.println("Scenario 0");
-    GPScoord Point10 = {52.42953, -1.94514};
-    GPScoord Point20 = {52.42945, -1.94673};
+    GPScoord Point10 = {52.429415, -1.946715};
+    GPScoord Point20 = {52.429463, -1.945933};
     GPScoord listpoints0[] = {Point10, Point20, Point10};
     non_blocking_path_following(listpoints0, 3);
   }
@@ -385,8 +389,8 @@ void nav::run_mission(){
   else if(scenario == 4){
     //Water test line 1
     Serial.println("Scenario 4");
-    GPScoord Point10 = {52.42953, -1.94514};
-    GPScoord Point20 = {52.42945, -1.94673};
+    GPScoord Point10 = {52.429415, -1.946715};
+    GPScoord Point20 = {52.429463, -1.945933};
     GPScoord listpoints0[] = {Point10, Point20, Point10};
     non_blocking_path_following(listpoints0, 3, true);
   }
@@ -425,6 +429,7 @@ void nav::run_mission(){
       Serial.println("Manual control");
       powerboard->send_com_rudder(controler->get_com_rudder());
       powerboard->send_com_sail(controler->get_com_sail());
+      sprintf(filename, "NAVLOG%d.TXT", getMaxLogIndex() + 1); // Update logfile number so that different scenario are logged in different files.
   }    
   delay(100);
 }
