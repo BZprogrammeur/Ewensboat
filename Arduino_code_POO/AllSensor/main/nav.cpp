@@ -21,11 +21,11 @@ nav::nav() : Kp(2.0), Kd(1.0), DELTA_T(0.1) {
   wind = new WindSensor();
   Serial.println("Wind sensor ready.");
   gps = new GPS();
-  // while(!gps->isValid()){
-  //   Serial.println("Searching for GPS...");
-  //   powerboard->set_angle_rudder(50 * cos(2 * PI *millis() / (5000)));
-  //   gps->update();
-  // }
+  while(!gps->isValid()){
+    Serial.println("Searching for GPS...");
+    powerboard->set_angle_rudder(50 * cos(2 * PI *millis() / (5000)));
+    gps->update();
+  }
   Serial.println("GPS ready.");
   controler = new Controler();
   Serial.println("Controler ready.");
@@ -103,7 +103,7 @@ void nav::update(bool save_logs = true){
   gps->update();
   controler->update();
   if(save_logs){
-  update_logs();
+    update_logs();
   }
   return;
 }
@@ -308,6 +308,7 @@ void nav::path_following(GPScoord list_points[], int nb_points, bool integral = 
 }
 
 void nav::non_blocking_path_following(GPScoord list_points[], int nb_points, bool integral = false){
+  // update();
   for(int i = 0; i < nb_points - 1; i++){
     GPScoord starting_point = list_points[i];
     GPScoord ending_point = list_points[i+1];
