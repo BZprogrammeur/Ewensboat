@@ -369,7 +369,7 @@ void nav::run_mission(){
   }
   else if(scenario == 2){
     // Water test line 2
-    // Note : Very short line intended to test position holding.
+    // Note : Short vertical line.
     Serial.println("Scenario 2");
     GPScoord Point12 = {52.429447, -1.946549};
     GPScoord Point22 = {52.429254, -1.946549};
@@ -378,12 +378,12 @@ void nav::run_mission(){
   }
   else if(scenario == 3){
     // Water test loop 2
-    // Note : goes through the whole lake.
+    // Note : goes around the whole lake.
     Serial.println("Scenario 3");
     GPScoord Point13 = {52.429172, -1.946466};
-    GPScoord Point23 = {52.429455, -1.946765};
+    GPScoord Point23 = {52.429439, -1.946722};
     GPScoord Point33 = {52.429542, -1.945092};
-    GPScoord Point43 = {52.429352, -1.946129};
+    GPScoord Point43 = {52.429359, -1.946209};
     GPScoord listpoints3[] = {Point13, Point23, Point33, Point43, Point13};
     non_blocking_path_following(listpoints3, 5);
   }
@@ -406,12 +406,12 @@ void nav::run_mission(){
   }
   else if(scenario == 6){
     // Water test loop 2
-    // Note : goes through the whole lake.
+    // Note : goes around the whole lake.
     Serial.println("Scenario 6");
     GPScoord Point13 = {52.429172, -1.946466};
-    GPScoord Point23 = {52.429455, -1.946765};
+    GPScoord Point23 = {52.429439, -1.946722};
     GPScoord Point33 = {52.429542, -1.945092};
-    GPScoord Point43 = {52.429352, -1.946129};
+    GPScoord Point43 = {52.429359, -1.946209};
     GPScoord listpoints3[] = {Point13, Point23, Point33, Point43, Point13};
     non_blocking_path_following(listpoints3, 5, true);
   }
