@@ -21,11 +21,11 @@ nav::nav() : Kp(2.0), Kd(1.0), DELTA_T(0.1) {
   wind = new WindSensor();
   Serial.println("Wind sensor ready.");
   gps = new GPS();
-  while(!gps->isValid()){
-    Serial.println("Searching for GPS...");
-    powerboard->set_angle_rudder(50 * cos(2 * PI *millis() / (5000)));
-    gps->update();
-  }
+  // while(!gps->isValid()){
+  //   Serial.println("Searching for GPS...");
+  //   powerboard->set_angle_rudder(50 * cos(2 * PI *millis() / (5000)));
+  //   gps->update();
+  // }
   Serial.println("GPS ready.");
   controler = new Controler();
   Serial.println("Controler ready.");
@@ -95,16 +95,14 @@ nav::~nav() {
     delete controler;
 }
 
-void nav::update(bool save_logs = true){
+void nav::update(){
   imu->update();
   wind->update_heading();
   // Serial.println(wind->get_wind_direction());
   // wind speed automatically updates every 2.25 seconds.
   gps->update();
   controler->update();
-  if(save_logs){
-    update_logs();
-  }
+  update_logs();
   return;
 }
 
@@ -155,7 +153,7 @@ void nav::linefollowing(float lata, float longa, float latb, float longb, bool i
     // % b --- the ending point;
     float heading = sawtooth(imu->get_heading() * PI / 180);
     // % r --- the cutoff distance;
-    float r = 6.; //Short distance such as 3 meters will hopefully allow the boat to navigate in a narrow canal.
+    float r = 10.; //Short distance such as 3 meters will hopefully allow the boat to navigate in a narrow canal.
     // % gamma --- the incidence angle;
     float gamma = PI / 4;
     // % phi --- the close hauled angle;
@@ -308,7 +306,6 @@ void nav::path_following(GPScoord list_points[], int nb_points, bool integral = 
 }
 
 void nav::non_blocking_path_following(GPScoord list_points[], int nb_points, bool integral = false){
-  // update();
   for(int i = 0; i < nb_points - 1; i++){
     GPScoord starting_point = list_points[i];
     GPScoord ending_point = list_points[i+1];
@@ -346,7 +343,7 @@ void nav::basic_place_holder(int time_millis){
 }
 
 void nav::run_mission(){
-  update(false);
+  update();
   scenario = (int)controler->get_scenario_number();
   // Serial.print("Scenario :");
   // Serial.println(scenario);
@@ -430,7 +427,6 @@ void nav::run_mission(){
       Serial.println("Manual control");
       powerboard->send_com_rudder(controler->get_com_rudder());
       powerboard->send_com_sail(controler->get_com_sail());
-      sprintf(filename, "NAVLOG%d.TXT", getMaxLogIndex() + 1); // Update logfile number so that different scenario are logged in different files.
   }    
   delay(100);
 }

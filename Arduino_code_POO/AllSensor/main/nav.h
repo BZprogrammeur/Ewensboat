@@ -24,7 +24,7 @@ public:
   void set_sail_pos();
   void linefollowing(float lata, float longa, float latb, float longb, bool integral = false);
   void update_logs();
-  void update(bool save_logs = true);
+  void update();
   void path_following(GPScoord list_points[], int nb_points, bool integral = false);
   void non_blocking_path_following(GPScoord list_points[], int nb_points, bool integral = false);
   void basic_place_holder(int time_millis);
