@@ -46,8 +46,10 @@ void loop(){
         while(CMPS12_Serial.available() < 1);
         status = CMPS12_Serial.read();
         Serial.println(int(status), BIN);
-        if(status == 255)
+        if(status == 255){
             m_cnt += 1;
+        }
+        delay(100);
     }
 
     Serial.println("   => Calibration done");

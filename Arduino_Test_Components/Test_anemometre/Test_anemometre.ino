@@ -27,13 +27,7 @@ void loop() {
         Serial.print(windSpeed);
         Serial.println(" m/s");
         heading_bytes = analogRead(A15);
-        heading = 2 * atan(tan(((float)heading_bytes / 1023 * 2 * M_PI + M_PI)/2)) * 180/M_PI;
-        if(heading>=0){
-            heading  = 180 - heading;
-        }
-        else{
-            heading = -180 - heading;
-        }
+        heading =  -2 * atan(tan(((float)heading_bytes / 1023 * 2 * M_PI + M_PI)/2)) * 180/M_PI;
         Serial.print("Direction du vent:");
         Serial.print(heading);
         Serial.println("°");

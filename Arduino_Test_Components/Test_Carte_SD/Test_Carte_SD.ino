@@ -21,7 +21,7 @@ void setup() {
   Serial.println(F("SD CARD INITIALIZED."));
 
   // open file for reading
-  myFile = SD.open("GPSDATA.CSV", FILE_READ);
+  myFile = SD.open("NAVLOG46.TXT", FILE_READ);
   if (myFile) {
     while (myFile.available()) {
       char ch = myFile.read(); // read characters one by one from Micro SD Card
@@ -29,7 +29,7 @@ void setup() {
     }
     myFile.close();
   } else {
-    Serial.print(F("SD Card: error on opening file arduino.txt"));
+    Serial.print(F("SD Card: error on opening file NAVLOG46.TXT"));
   }
 }
 
