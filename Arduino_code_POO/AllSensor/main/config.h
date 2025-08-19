@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 #define SERVOMIN_RUDDER  200 // Minimum pulse length Rudder must be centered around XXX
-#define SERVOMAX_RUDDER  410 // Maximum pulse length
+#define SERVOMAX_RUDDER  430 // Maximum pulse length
 #define SERVOMIN_SAIL  225 // Minimum pulse length
 #define SERVOMAX_SAIL  350 // Maximum pulse length
 #define SERVO_SAIL 0
@@ -18,8 +18,8 @@
 #define ANGLE_16 0x13
 #define CMPS12_CALIBRATION_STATUS 0x24
 
-#define AILERON_MIN 1230
-#define AILERON_MAX 1790
+#define AILERON_MIN 1260
+#define AILERON_MAX 1780
 #define ELEVATION_MIN 2030
 #define ELEVATION_MAX 910
 #define CONTROL_THRESHOLD 1450

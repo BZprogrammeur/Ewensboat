@@ -53,7 +53,7 @@ private:
     float q = 1;
     float z = 0;
     float dt = 0.1;
-    float alpha = 0.05;
+    float alpha = 0.02;
     int scenario = -1;
 };
 

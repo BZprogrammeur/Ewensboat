@@ -21,11 +21,11 @@ nav::nav() : Kp(2.0), Kd(1.0), DELTA_T(0.1) {
   wind = new WindSensor();
   Serial.println("Wind sensor ready.");
   gps = new GPS();
-  // while(!gps->isValid()){
-  //   Serial.println("Searching for GPS...");
-  //   powerboard->set_angle_rudder(50 * cos(2 * PI *millis() / (5000)));
-  //   gps->update();
-  // }
+  while(!gps->isValid()){
+    Serial.println("Searching for GPS...");
+    powerboard->set_angle_rudder(50 * cos(2 * PI *millis() / (5000)));
+    gps->update();
+  }
   Serial.println("GPS ready.");
   controler = new Controler();
   Serial.println("Controler ready.");
@@ -103,45 +103,6 @@ void nav::update(){
   gps->update();
   controler->update();
   update_logs();
-  return;
-}
-
-void nav::follow_cap(float cap_a_suivre) {
-  update();
-  if(controler->checkUnmanned()){
-  float cap_actuel = imu->get_heading(); // Renvoie un cap entre -180 et 180 degrees
-  // Calcul de l’erreur dans [-180, +180] degrés
-  float erreur = cap_a_suivre - cap_actuel;
-  if (erreur > 50.) erreur = 50.;
-  if (erreur < -50.) erreur = -50.;
-  //Serial.print("Erreur calculée:  ");
-  //Serial.println(erreur);
-  powerboard->set_angle_rudder(-(int)erreur);
-  erreur_precedente = erreur;
-  set_sail_pos();
-  }
-  else{
-    powerboard->send_com_rudder(controler->get_com_rudder());
-    powerboard->send_com_sail(controler->get_com_sail());
-  }
-  delay(100);
-  return;
-}
-
-void nav::set_sail_pos(){
-  float wind_angle = wind->get_wind_direction();
-  //Serial.print("Angle du vent mesuré:");
-  //Serial.println(wind_angle);
-  float sail_angle;
-  if(abs(wind_angle) <= 50){
-    sail_angle = 90.;
-  }
-  else{
-    sail_angle = map(abs(wind_angle), 50, 180, 0, 90);
-  }
-  //Serial.print("Angle calculé de la voile:");
-  //Serial.println(sail_angle);
-  powerboard->set_angle_sail(sail_angle);  
   return;
 }
 
@@ -238,7 +199,12 @@ float nav::get_true_wind_dir(){
   // Serial.println(SOG);
   float COG = imu->get_heading() * PI / 180; // technically false but good enough approximation as the GPS is very unprecise and the boat doesn't drift much.
   float AWS = wind->get_wind_speed() ;
+  // Serial.print("AWS: ");
+  // Serial.println(AWS);
   float AWD = sawtooth((wind->get_wind_direction() + imu->get_heading()) * PI / 180);
+  if(AWS == 0 && SOG == 0){
+    return AWD;
+  }
   float u = SOG * sin(COG) - AWS * sin(AWD);
   float v = SOG * cos(COG) - AWS * cos(AWD);
   return sawtooth(atan2(u, v) - PI);
@@ -350,17 +316,22 @@ void nav::run_mission(){
   if(scenario == 0){
     // Water test line 1
     Serial.println("Scenario 0");
-    GPScoord Point10 = {52.429415, -1.946715};
-    GPScoord Point20 = {52.429463, -1.945933};
+    // GPScoord Point10 = {52.429415, -1.946715};
+    // GPScoord Point20 = {52.429463, -1.945933};
+    GPScoord Point10 = {52.429390, -1.946684};
+    GPScoord Point20 = {52.429450, -1.946031};
     GPScoord listpoints0[] = {Point10, Point20, Point10};
     non_blocking_path_following(listpoints0, 3);
   }
   else if(scenario == 1){
     // Water test loop 1
     Serial.println("Scenario 1");
-    GPScoord Point11 = {52.429209, -1.946479};
-    GPScoord Point21 = {52.429459, -1.946778};
-    GPScoord Point31 = {52.429506, -1.946167};
+    // GPScoord Point11 = {52.429209, -1.946479};
+    // GPScoord Point21 = {52.429459, -1.946778};
+    // GPScoord Point31 = {52.429506, -1.946167};
+    GPScoord Point11 = {52.429246, -1.946501};
+    GPScoord Point21 = {52.429420, -1.946751};
+    GPScoord Point31 = {52.429440, -1.946201};
     GPScoord listpoints1[] = {Point11, Point21, Point31, Point11};
     non_blocking_path_following(listpoints1, 4);
   }
@@ -368,8 +339,8 @@ void nav::run_mission(){
     // Water test line 2
     // Note : Short vertical line.
     Serial.println("Scenario 2");
-    GPScoord Point12 = {52.429447, -1.946549};
-    GPScoord Point22 = {52.429254, -1.946549};
+    GPScoord Point12 = {52.429254, -1.946549};
+    GPScoord Point22 = {52.429447, -1.946549};
     GPScoord listpoints2[] = {Point12, Point22, Point12};
     non_blocking_path_following(listpoints2, 3);
   }
@@ -377,27 +348,36 @@ void nav::run_mission(){
     // Water test loop 2
     // Note : goes around the whole lake.
     Serial.println("Scenario 3");
-    GPScoord Point13 = {52.429172, -1.946466};
-    GPScoord Point23 = {52.429439, -1.946722};
-    GPScoord Point33 = {52.429542, -1.945092};
-    GPScoord Point43 = {52.429359, -1.946209};
+    // GPScoord Point13 = {52.429172, -1.946466};
+    // GPScoord Point23 = {52.429439, -1.946722};
+    // GPScoord Point33 = {52.429542, -1.945092};
+    // GPScoord Point43 = {52.429359, -1.946209};
+    GPScoord Point13 = {52.429250, -1.946510};
+    GPScoord Point23 = {52.429438, -1.946770};
+    GPScoord Point33 = {52.429502, -1.945649};
+    GPScoord Point43 = {52.429433, -1.946102};
     GPScoord listpoints3[] = {Point13, Point23, Point33, Point43, Point13};
     non_blocking_path_following(listpoints3, 5);
   }
   else if(scenario == 4){
     //Water test line 1
     Serial.println("Scenario 4");
-    GPScoord Point10 = {52.429415, -1.946715};
-    GPScoord Point20 = {52.429463, -1.945933};
+    // GPScoord Point10 = {52.429415, -1.946715};
+    // GPScoord Point20 = {52.429463, -1.945933};
+    GPScoord Point10 = {52.429390, -1.946684};
+    GPScoord Point20 = {52.429450, -1.946031};
     GPScoord listpoints0[] = {Point10, Point20, Point10};
     non_blocking_path_following(listpoints0, 3, true);
   }
   else if(scenario == 5){
     // Water test loop 1
     Serial.println("Scenario 5");
-    GPScoord Point11 = {52.429209, -1.946479};
-    GPScoord Point21 = {52.429459, -1.946778};
-    GPScoord Point31 = {52.429506, -1.946167};
+    // GPScoord Point11 = {52.429209, -1.946479};
+    // GPScoord Point21 = {52.429459, -1.946778};
+    // GPScoord Point31 = {52.429506, -1.946167};
+    GPScoord Point11 = {52.429246, -1.946501};
+    GPScoord Point21 = {52.429420, -1.946751};
+    GPScoord Point31 = {52.429440, -1.946201};
     GPScoord listpoints1[] = {Point11, Point21, Point31, Point11};
     non_blocking_path_following(listpoints1, 4, true);
   }
@@ -405,10 +385,14 @@ void nav::run_mission(){
     // Water test loop 2
     // Note : goes around the whole lake.
     Serial.println("Scenario 6");
-    GPScoord Point13 = {52.429172, -1.946466};
-    GPScoord Point23 = {52.429439, -1.946722};
-    GPScoord Point33 = {52.429542, -1.945092};
-    GPScoord Point43 = {52.429359, -1.946209};
+    // GPScoord Point13 = {52.429172, -1.946466};
+    // GPScoord Point23 = {52.429439, -1.946722};
+    // GPScoord Point33 = {52.429542, -1.945092};
+    // GPScoord Point43 = {52.429359, -1.946209};
+    GPScoord Point13 = {52.429250, -1.946510};
+    GPScoord Point23 = {52.429438, -1.946770};
+    GPScoord Point33 = {52.429502, -1.945649};
+    GPScoord Point43 = {52.429433, -1.946102};
     GPScoord listpoints3[] = {Point13, Point23, Point33, Point43, Point13};
     non_blocking_path_following(listpoints3, 5, true);
   }
@@ -421,7 +405,7 @@ void nav::run_mission(){
     GPScoord Point4 = {52.4847932, -1.8899488};
     GPScoord Point5 = {52.4846881, -1.8896900};
     GPScoord listpoints[] = {Point1, Point2, Point3, Point4, Point5, Point1};
-    non_blocking_path_following(listpoints, 6, true);
+    non_blocking_path_following(listpoints, 6);
   }
   else if(scenario == 9){
       Serial.println("Manual control");

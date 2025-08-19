@@ -132,14 +132,14 @@ def generate_animation(logs : np.ndarray, ref_point : np.ndarray) -> None:
         ax.plot((R_boat @ (R_rud_re @ rud_shape - size_factor * np.array([[0], [2]])))[0] + x[i], (R_boat @ (R_rud_re @ rud_shape - size_factor * np.array([[0], [2]])))[1] + y[i], color = 'green')
         ax.plot(x[:i+1], y[:i+1], 'b')
         try:
-            plt.pause((time[i+1] - time[i])/10000)
+            plt.pause((time[i+1] - time[i])/1000)
         except IndexError:
             pass
     return
 
 def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, listpoints : list) -> None:
     ref_point *= np.pi/180
-    r = 6
+    r = 10
     q = 1
     gamma = np.pi/4
     phi = np.pi/3
@@ -259,30 +259,33 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, listpoints : l
         ax.plot((R_line @ arrow_shape + A)[0], (R_line @ arrow_shape + A)[1])
         ax.plot((R_nom @ arrow_shape)[0] + x[i], (R_nom @ arrow_shape)[1] + y[i], color = 'red')
         ax.plot((R_aimed @ arrow_shape)[0] + x[i], (R_aimed @ arrow_shape)[1] + y[i], color = 'green')
-        ax.annotate(
-            '', 
-            xy=arrow_tip_pos, xycoords='axes fraction',
-            xytext=arrow_pos, textcoords='axes fraction',
-            arrowprops=dict(facecolor='red', shrink=0.05)
-            )
-        ax.text(0.7, 0.8, f'True wind speed : {np.linalg.norm(true_wind)}',
-                transform=ax.transAxes,
-                fontsize=8)
+        true_wind = np.array([[0, -1], [1, 0]]) @ true_wind
+        if np.linalg.norm(true_wind) != 0:
+            arrow_tip_pos = (arrow_pos[0] + 0.15 * true_wind[0, 0] / np.linalg.norm(true_wind), arrow_pos[1] + 0.15 * true_wind[1, 0] / np.linalg.norm(true_wind))
+            ax.annotate(
+                '', 
+                xy=arrow_tip_pos, xycoords='axes fraction',
+                xytext=arrow_pos, textcoords='axes fraction',
+                arrowprops=dict(facecolor='red', shrink=0.05)
+                )
+            ax.text(0.7, 0.8, f'True wind speed : {np.linalg.norm(true_wind)}',
+                    transform=ax.transAxes,
+                    fontsize=8)
         try:
             plt.pause((logs[0][i+1] - logs[0][i])/1000)
         except IndexError:
             pass
         
 if __name__ == '__main__' :
-    # ref_point = np.array([52.4844041, -1.8898449])
+    ref_point = np.array([52.4844041, -1.8898449])
     # Point1 = np.array([52.485958, -1.889726])
     # Point2 = np.array([52.4860084, -1.8889055])
-    # Point1 = np.array([52.4844663, -1.8895039])
-    # Point2 = np.array([52.4843069, -1.8905943])
-    # Point3 = np.array([52.4845141, -1.8905922])
-    # Point4 = np.array([52.4847932, -1.8899488])
-    # Point5 = np.array([52.4846881, -1.8896900])
-    water_refpoint = np.array([52.429363, -1.946551])
-    toKML(46)
-    generate_animation(read_log(46), water_refpoint)
-    # simulate_computing(read_log(45), ref_point, [Point1, Point2, Point3, Point4, Point5, Point1])
+    Point1 = np.array([52.4844663, -1.8895039])
+    Point2 = np.array([52.4843069, -1.8905943])
+    Point3 = np.array([52.4845141, -1.8905922])
+    Point4 = np.array([52.4847932, -1.8899488])
+    Point5 = np.array([52.4846881, -1.8896900])
+    # water_refpoint = np.array([52.429363, -1.946551])
+    toKML(50)
+    # generate_animation(read_log(48), water_refpoint)
+    simulate_computing(read_log(50), ref_point, [Point1, Point2, Point3, Point4, Point5, Point1])

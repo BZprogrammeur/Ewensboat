@@ -62,7 +62,8 @@ void loop(){
         unsigned int angle16 = high_byte;           // Calculate 16 bit angle
         angle16 <<= 8;
         angle16 += low_byte;
-        float m_raw_yaw = - sawtooth((angle16 / 10 + (float)(angle16%10)/10 + 180) * PI / 180) * 180 / PI;
+        float m_raw_yaw = -sawtooth((angle16 / 10 + (float)(angle16%10)/10 - 180) * PI / 180) * 180 / PI; // heading = 0 if the boat is heading north, angle are given following the counterclockwise direction to facilitate computing.
+
         Serial.print("Angle:");
         Serial.println(m_raw_yaw);
     }
