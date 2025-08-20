@@ -111,7 +111,7 @@ def generate_animation(logs : np.ndarray, ref_point : np.ndarray) -> None:
                            [np.sin(sail_angles[i]), np.cos(sail_angles[i])]])
         true_wind = np.array([[SOG[i] * np.sin(head[i]) - logs[6][i] * np.sin(dir_wind[i])], 
                               [SOG[i] * np.cos(head[i]) - logs[6][i] * np.cos(dir_wind[i])]])
-        true_wind_angle = sawtooth(np.arctan2(true_wind[0][0], true_wind[1][0]) - (np.pi))
+        true_wind_angle = sawtooth(np.arctan2(true_wind[0][0], true_wind[1][0]) - np.pi)
         print(f'true wind : {true_wind}')
         print(f'true wind angle : {true_wind_angle * 180 / np.pi}')
         true_wind = np.array([[0, -1], [1, 0]]) @ true_wind
@@ -277,15 +277,15 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, listpoints : l
             pass
         
 if __name__ == '__main__' :
-    ref_point = np.array([52.4844041, -1.8898449])
+    # ref_point = np.array([52.4844041, -1.8898449])
     # Point1 = np.array([52.485958, -1.889726])
     # Point2 = np.array([52.4860084, -1.8889055])
-    Point1 = np.array([52.4844663, -1.8895039])
-    Point2 = np.array([52.4843069, -1.8905943])
-    Point3 = np.array([52.4845141, -1.8905922])
-    Point4 = np.array([52.4847932, -1.8899488])
-    Point5 = np.array([52.4846881, -1.8896900])
-    # water_refpoint = np.array([52.429363, -1.946551])
-    toKML(50)
-    # generate_animation(read_log(48), water_refpoint)
-    simulate_computing(read_log(50), ref_point, [Point1, Point2, Point3, Point4, Point5, Point1])
+    # Point1 = np.array([52.4844663, -1.8895039])
+    # Point2 = np.array([52.4843069, -1.8905943])
+    # Point3 = np.array([52.4845141, -1.8905922])
+    # Point4 = np.array([52.4847932, -1.8899488])
+    # Point5 = np.array([52.4846881, -1.8896900])
+    water_refpoint = np.array([52.429363, -1.946551])
+    toKML(51)
+    generate_animation(read_log(51), water_refpoint)
+    # simulate_computing(read_log(50), ref_point, [Point1, Point2, Point3, Point4, Point5, Point1])
