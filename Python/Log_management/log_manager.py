@@ -2,7 +2,7 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-# %matplotlib qt
+%matplotlib qt
 import simplekml
 import time
 
@@ -74,6 +74,7 @@ def conv_sail_com_to_pos(com: np.ndarray) -> np.ndarray:
 def GPS2cart(gpscoord : np.ndarray, refcoord : np.ndarray) -> np.ndarray:
     refcoord_rad = refcoord * np.pi / 180
     gpscoord_rad = gpscoord * np.pi / 180
+    # print(f'GPS coordinates: {gpscoord_rad}')
     R = 6371e3
     x = R * (gpscoord_rad[1] - refcoord_rad[1]) * np.cos(refcoord_rad[0])
     y = R * (gpscoord_rad[0] - refcoord_rad[0])
@@ -287,7 +288,7 @@ def simulate_computing(logs : np.ndarray, ref_point : np.ndarray, listpoints : l
         
 def display_scenario_logs(lognumber : int, ref_point : np.ndarray, listscenario : list) -> None:
     logs = read_log(lognumber)
-    ref_point *= np.pi/180
+    ref_point_rad = ref_point * np.pi/180
     r = 10
     q = 1
     gamma = np.pi/4
@@ -320,8 +321,8 @@ def display_scenario_logs(lognumber : int, ref_point : np.ndarray, listscenario 
     rud_angles = conv_rud_com_to_pos(logs[7]) * np.pi / 180
     sail_angles = conv_sail_com_to_pos(logs[8]) * np.pi / 180
     arrow_pos = (0.85, 0.85)
-    x = R * (long - ref_point[1]) * np.cos(ref_point[0])
-    y = R * (lat - ref_point[0])
+    x = R * (long - ref_point_rad[1]) * np.cos(ref_point_rad[0])
+    y = R * (lat - ref_point_rad[0])
     dir_wind = (logs[5] + logs[3]) * np.pi / 180
     lenlogs = len(logs[0])
     listscenario_cart = []
@@ -331,7 +332,7 @@ def display_scenario_logs(lognumber : int, ref_point : np.ndarray, listscenario 
             listpoints_cart.append(GPS2cart(coord, ref_point))
         listscenario_cart.append(listpoints_cart)
         listpoints_cart = []
-    print(listscenario_cart)
+    # print(listscenario_cart)
     i = 0
     while i < lenlogs:
         ax.clear()
@@ -355,12 +356,14 @@ def display_scenario_logs(lognumber : int, ref_point : np.ndarray, listscenario 
             B = listscenario_cart[scen_num][j + 1]
             D = M - A
             if (A - B)[0] * (M - B)[0] + (A - B)[1] * (M - B)[1] < 0:
+                print("Switching to next line")
                 if j < len(listscenario_cart[scen_num]) - 2:
                     j += 1
                 else: 
                     j = 0
             for n in range(len(listscenario_cart[scen_num]) - 1):
-                ax.plot(listscenario_cart[scen_num][n], listscenario_cart[scen_num][n+1], color = 'blue' if n!=j else 'red')
+                # print(listscenario_cart[scen_num][n].T[0])
+                ax.plot([listscenario_cart[scen_num][n][0, 0], listscenario_cart[scen_num][n+1][0, 0]], [listscenario_cart[scen_num][n][1, 0], listscenario_cart[scen_num][n+1][1, 0]], color = 'blue' if n!=j else 'red')
         true_wind = np.array([[SOG[i] * np.sin(head[i]) - logs[6][i] * np.sin(dir_wind[i])], 
                               [SOG[i] * np.cos(head[i]) - logs[6][i] * np.cos(dir_wind[i])]])
         true_wind_angle = sawtooth(np.arctan2(true_wind[0][0], true_wind[1][0]) - (np.pi))
@@ -368,7 +371,7 @@ def display_scenario_logs(lognumber : int, ref_point : np.ndarray, listscenario 
         ax.plot((R_boat @ boat_shape)[0] + x[i], (R_boat @ boat_shape)[1] + y[i], color = ('black' if logs[-1][i] == 0 else 'blue'))
         ax.plot((R_sail_re @ R_boat @ sail_shape)[0] + x[i], (R_sail_re @ R_boat @ sail_shape)[1] + y[i], color = 'green')
         ax.plot((R_boat @ (R_rud_re @ rud_shape - size_factor * np.array([[0], [2]])))[0] + x[i], (R_boat @ (R_rud_re @ rud_shape - size_factor * np.array([[0], [2]])))[1] + y[i], color = 'green')
-        ax.plot(x[:i+1], y[:i+1], 'b')
+        ax.plot(x[(max(0, i-1000)):i+1], y[(max(0, i-1000)):i+1], 'b')
         true_wind = np.array([[0, -1], [1, 0]]) @ true_wind
         if np.linalg.norm(true_wind) != 0:
             arrow_tip_pos = (arrow_pos[0] + 0.15 * true_wind[0, 0] / np.linalg.norm(true_wind), arrow_pos[1] + 0.15 * true_wind[1, 0] / np.linalg.norm(true_wind))
@@ -415,4 +418,5 @@ if __name__ == '__main__' :
     water_refpoint = np.array([52.429363, -1.946551])
     toKML(51)
     display_scenario_logs(51, water_refpoint, listscenario)
+    # generate_animation(read_log(51), water_refpoint)
     # simulate_computing(read_log(50), ref_point, [Point1, Point2, Point3, Point4, Point5, Point1])
