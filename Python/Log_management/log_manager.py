@@ -305,10 +305,10 @@ def display_scenario_logs(lognumber : int, ref_point : np.ndarray, listscenario 
     R = 6371e3
     j = 0
     fig, ax = plt.subplots()
-    ax.xmin=-100
-    ax.xmax=100
-    ax.ymin=-100
-    ax.ymax=100
+    ax.xmin=-50
+    ax.xmax=50
+    ax.ymin=-50
+    ax.ymax=50
     size_factor = 6
     boat_shape = size_factor * np.array([[-0.25, 0, 0.25, 0.25, -0.25, -0.25],
                            [0., 1, 0., -2., -2., 0.]])
@@ -342,7 +342,7 @@ def display_scenario_logs(lognumber : int, ref_point : np.ndarray, listscenario 
         if prev_scen_num != scen_num:
             prev_scen_num = scen_num
             j = 0
-            print(f'Scenario numder : {scen_num}')
+            print(f'Scenario number : {scen_num}')
         R_boat = np.array([[np.cos(head[i]), -np.sin(head[i])],
                            [np.sin(head[i]), np.cos(head[i])]]) 
         R_rud_re = np.array([[np.cos(rud_angles[i]), -np.sin(rud_angles[i])],
@@ -362,7 +362,7 @@ def display_scenario_logs(lognumber : int, ref_point : np.ndarray, listscenario 
                 else: 
                     j = 0
             for n in range(len(listscenario_cart[scen_num]) - 1):
-                # print(listscenario_cart[scen_num][n].T[0])
+                # print(listscenario_cart[scen_num][n])
                 ax.plot([listscenario_cart[scen_num][n][0, 0], listscenario_cart[scen_num][n+1][0, 0]], [listscenario_cart[scen_num][n][1, 0], listscenario_cart[scen_num][n+1][1, 0]], color = 'blue' if n!=j else 'red')
         true_wind = np.array([[SOG[i] * np.sin(head[i]) - logs[6][i] * np.sin(dir_wind[i])], 
                               [SOG[i] * np.cos(head[i]) - logs[6][i] * np.cos(dir_wind[i])]])
@@ -385,7 +385,7 @@ def display_scenario_logs(lognumber : int, ref_point : np.ndarray, listscenario 
                     transform=ax.transAxes,
                     fontsize=8)
         try:
-            plt.pause((logs[0][i+1] - logs[0][i])/100000)
+            plt.pause((logs[0][i+1] - logs[0][i])/1000)
         except IndexError:
             pass
         i += 1
@@ -408,7 +408,7 @@ if __name__ == '__main__' :
     scenario1 = [Point11, Point21, Point31, Point11]
     Point12 = np.array([52.429254, -1.946549])
     Point22 = np.array([52.429447, -1.946549])
-    scenario2 = [Point21, Point22, Point21]
+    scenario2 = [Point12, Point22, Point12]
     Point13 = np.array([52.429250, -1.946510])
     Point23 = np.array([52.429438, -1.946770])
     Point33 = np.array([52.429502, -1.945649])

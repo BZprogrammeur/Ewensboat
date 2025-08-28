@@ -170,7 +170,7 @@ void nav::linefollowing(float lata, float longa, float latb, float longb, bool i
     // Serial.print("Target angle:");
     // Serial.println(aimed_angle);
     float angle_rudder;
-    angle_rudder = angle_ruddermax*sin(sawtooth(heading-aimed_angle)/2);
+    angle_rudder = angle_ruddermax*sin(sawtooth(heading-aimed_angle));
     if(cos(heading - aimed_angle) < 0){ // Meaning "if the aimed heading is behind the boat"
       if(sin(heading - aimed_angle) >= 0){
         angle_rudder = angle_ruddermax;
