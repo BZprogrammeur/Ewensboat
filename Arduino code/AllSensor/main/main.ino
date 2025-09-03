@@ -13,8 +13,8 @@ IMU imu;
 controlMotor powerboard;
 WindSensor wind;
 Controler manette;
-Navigation nav(imu, powerboard, wind, gps_boat);
 SDcard sd;
+Navigation nav(imu, powerboard, wind, gps_boat, sd);
 
 int display_count = 0;
 GPScoord point_cible = {52.4844041, -1.8898449}; 

@@ -12,6 +12,9 @@ public:
     void saveDatas(float time, float latitude, float longitude,
                    float wind_direction, float wind_speed, float heading,
                    int angle_rud, int angle_sail, bool control);
+    void save_flag(int flag);
+    void save_capcible(float cap);
+    int getMaxLogIndex();
 
 private:
     const int chipSelect = 53;  // Pin CS pour la carte SD (Mega 2560)
@@ -19,6 +22,7 @@ private:
     unsigned long lastLog = 0;
     unsigned long interval = 5000;
     File logFile;
+    char file[20];
 };
 
 #endif

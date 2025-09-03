@@ -5,15 +5,24 @@ void SDcard::init() {
     Serial.println("Erreur : carte SD non détectée !");
     return;
   }
+
+  logNumber = getMaxLogIndex();
+
+  sprintf(file, "log%d.txt", logNumber);
+
   Serial.println("Carte SD prête.");
-  logFile = SD.open("log.txt", FILE_WRITE);
+  Serial.print("Ouverture : "); Serial.println(file);
+
+  logFile = SD.open(file, FILE_WRITE);
+
   if (logFile) {
     logFile.println("=== Début du log ===");
-    //logFile.close();
+    logFile.flush();
   } else {
-    Serial.println("Erreur : impossible d'ouvrir log.txt");
+    Serial.println("Erreur : impossible d'ouvrir les fichiers de log");
   }
 }
+
 
 void SDcard::saveDatas(float time, float latitude, float longitude,
                        float wind_direction, float wind_speed, float heading,
@@ -60,4 +69,52 @@ void SDcard::saveDatas(float time, float latitude, float longitude,
     } else {
         Serial.println("Erreur d'ouverture du fichier log.txt");
     }
+}
+
+void SDcard::save_flag(int flag)
+{
+  if (logFile){
+    logFile.print("flag: ");
+    logFile.println(flag);
+    logFile.flush();
+    } 
+  else {
+        Serial.println("Erreur d'ouverture du fichier log.txt");
+       }
+}
+
+void SDcard::save_capcible(float cap)
+{
+  if (logFile){
+    logFile.print("cap cible: ");
+    logFile.println(cap);
+    logFile.flush();
+    } 
+    else {
+        Serial.println("Erreur d'ouverture du fichier log.txt");
+         }
+}
+
+int SDcard::getMaxLogIndex() {
+  int maxIndex = -1;
+  File root = SD.open("/");
+
+  while (true) {
+    File entry = root.openNextFile();
+    if (!entry) {
+      break;
+    }
+
+    String filename = entry.name();
+    entry.close();
+
+    if (filename.startsWith("log") && filename.endsWith(".TXT")) {
+      String numberPart = filename.substring(6, filename.length() - 4);
+      int index = numberPart.toInt();
+      if (index > maxIndex) {
+        maxIndex = index;
+      }
+    }
+  }
+  return maxIndex;
 }

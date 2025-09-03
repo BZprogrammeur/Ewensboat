@@ -3,8 +3,8 @@
 
 #define SERVOMIN_RUDDER  180 // Minimum pulse length
 #define SERVOMAX_RUDDER  430 //somme des deux doit faire 580
-#define SERVOMIN_SAIL  180 // Minimum pulse length
-#define SERVOMAX_SAIL  280 // Maximum pulse length
+#define SERVOMIN_SAIL  225 // Minimum pulse length
+#define SERVOMAX_SAIL  350 // Maximum pulse length
 #define R 12
 #define GAMMA M_PI/4  ///< Incidence angle
 #define ZETA M_PI/4

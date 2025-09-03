@@ -8,10 +8,11 @@
 #include "config.h"
 #include "GPS2.h"
 #include "windSensor.h"
+#include "SDcard.h"
 
 class Navigation {
 public:
-    Navigation(IMU& imu, controlMotor& motor, WindSensor& wind, GPS2& gps);
+    Navigation(IMU& imu, controlMotor& motor, WindSensor& wind, GPS2& gps, SDcard& sd);
     
     void follow_cap(float cap_a_suivre);
     void reach_point(GPScoord point);
@@ -49,6 +50,7 @@ private:
     controlMotor& powerboard;
     WindSensor& wind;
     GPS2& gps;
+    SDcard& sd;
 };
 
 

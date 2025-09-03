@@ -2,8 +2,8 @@
 #include <Wire.h>
 #include "ewensboatlib.h"
 
-Navigation::Navigation(IMU& imu_, controlMotor& motor_, WindSensor& wind_, GPS2& gps_)
-    : imu(imu_), powerboard(motor_), wind(wind_), gps(gps_){
+Navigation::Navigation(IMU& imu_, controlMotor& motor_, WindSensor& wind_, GPS2& gps_, SDcard& sd_)
+    : imu(imu_), powerboard(motor_), wind(wind_), gps(gps_), sd(sd_){
   sens = false;
   isTacking = false;
   }
@@ -78,6 +78,7 @@ void Navigation::reach_point(GPScoord point) {
   float cap = atan2(dx, dy)*180/M_PI;
   Serial.print("  cap cible :");
   Serial.print(cap);
+  sd.save_capcible(cap);
 
   // Fonction qui fait suivre le cap
   follow_cap(cap);
@@ -171,6 +172,7 @@ void Navigation::follow_path2(GPScoord chemin[], int taille){
 
   Serial.print("flag : ");
   Serial.print(i);
+  sd.save_flag(i);
   GPScoord next_point = chemin[i];
   GPScoord pos_actuelle = {gps.getLatitude(), gps.getLongitude()};
   reach_point(next_point);
